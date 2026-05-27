@@ -134,13 +134,13 @@ public class MainMenu {
     jMenuRun.setMnemonic('r');
     jMenuItemCompile.setAction(am.getCompileAction());
     jMenuItemCompile.setText("Load & Compile");
-    //jMenuItemCompile.setMnemonic('c');
+    jMenuItemCompile.setMnemonic('c');
     jMenuItemInterrupt.setAction(am.getInterruptAction());
     jMenuItemInterrupt.setText("Interrupt");
-    //jMenuItemInterrupt.setMnemonic('i');
+    jMenuItemInterrupt.setMnemonic('i');
     jMenuItemTest.setAction(am.getTestAction());
     jMenuItemTest.setText("Test");
-    //jMenuItemTest.setMnemonic('t');
+    jMenuItemTest.setMnemonic('t');
     jMenuRun.add(jMenuItemCompile);
     jMenuRun.add(jMenuItemInterrupt);
     jMenuRun.add(jMenuItemTest);
