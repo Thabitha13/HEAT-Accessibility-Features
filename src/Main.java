@@ -64,6 +64,7 @@ public static void main(String[] args) {
 
       InterpreterManager im = InterpreterManager.getInstance();
       im.startProcess(false);
+      try { Thread.sleep(2000); } catch (Exception e) {} // Wait for startup
     }
     
     if (args.length > 0) {
@@ -78,6 +79,7 @@ public static void main(String[] args) {
         wm.onlyConsole();
         wm.getConsoleWindow().getFocus();
     }
+    accessibility.TTSManager.getInstance().setStartupComplete();
     wm.setVisible();
    }
 }

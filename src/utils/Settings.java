@@ -53,5 +53,8 @@ public class Settings {
   public static final String TEST_FUNCTION = "TEST_FUNCTION";
   
   public static final String TEST_POSITIVE = "TEST_POSITIVE";
+
+  /** Whether TTS reading is enabled */
+  public static final String TTS_ENABLED = "TTS_ENABLED";
   
 }

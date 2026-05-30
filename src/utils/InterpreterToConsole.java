@@ -66,6 +66,7 @@ public class InterpreterToConsole extends Thread {
    		          javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                             public void run() {
 				  cw.charFromInterpreter(character);
+          accessibility.TTSManager.getInstance().bufferChar(character); // TTS
                             }
 			  });
 			  // yield(); // give GUI chance to print the character

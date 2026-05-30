@@ -105,6 +105,7 @@ public class WindowManager {
           case COMPILEDERROR: 
             log.info("[WindowManager]: setStatusCompiledError");
             toolbar.setCompileStatus(0);
+            accessibility.TTSManager.getInstance().speak("Compilation failed. Check the error in the console."); // TTS
             consoleWindow.setEnabled(false);
             displayWindow.setEnabled(true);
 	    setCompileEnabled(false);
@@ -114,6 +115,9 @@ public class WindowManager {
           case COMPILEDCORRECT:
             log.info("[WindowManager]: setStatusCompiledCorrect");
             toolbar.setCompileStatus(1);
+            if (savedStatus != COMPILEDCORRECT) { // Only speak if status actually changed
+              accessibility.TTSManager.getInstance().speak("Compilation successful. Ready to evaluate."); // TTS
+            }
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(true);
             setCompileEnabled(false);
@@ -123,6 +127,7 @@ public class WindowManager {
           case UNCOMPILED:
             log.info("[WindowManager]: setStatusUncompiled");
             toolbar.setCompileStatus(2);
+            accessibility.TTSManager.getInstance().speak("Program not compiled. Press compile to load."); // TTS
             consoleWindow.setEnabled(false);
             displayWindow.setEnabled(true);
             setCompileEnabled(true);
@@ -132,6 +137,7 @@ public class WindowManager {
           case EVALUATING:
             log.info("[WindowManager]: setStatusEvaluating");
             toolbar.setCompileStatus(3);
+            accessibility.TTSManager.getInstance().speak("Evaluating."); // TTS
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(false); 
             setCompileEnabled(false);
@@ -141,6 +147,7 @@ public class WindowManager {
           case NOPROGRAM:
             log.info("[WindowManager]: setStatusNoProgram");
             toolbar.setCompileStatus(1);
+            accessibility.TTSManager.getInstance().speak("No program loaded. Open a Haskell file to begin."); // TTS
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(false);
             setCompileEnabled(false);
