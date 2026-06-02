@@ -422,7 +422,15 @@ public class WindowManager {
 
       
       setStatusNotCompiled();
+
+// Restore high contrast mode if previously enabled by user
       
+      boolean hc = Boolean.parseBoolean(
+        SettingsManager.getInstance().getSetting(utils.Settings.HIGH_CONTRAST_ENABLED));
+      if (hc) {
+        applyHighContrastTheme(true);
+      }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
