@@ -105,6 +105,7 @@ public class SettingsManager {
     newSettings.setProperty(Settings.TEST_FUNCTION,"");
     newSettings.setProperty(Settings.TEST_POSITIVE,"True");
     newSettings.setProperty(Settings.TTS_ENABLED,"true");
+    newSettings.setProperty(Settings.HIGH_CONTRAST_ENABLED, "false");
     return newSettings;
   }
   
