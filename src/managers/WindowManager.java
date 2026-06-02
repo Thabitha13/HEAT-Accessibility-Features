@@ -15,6 +15,8 @@
 
 package managers;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
