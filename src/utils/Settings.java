@@ -56,5 +56,6 @@ public class Settings {
 
   /** Whether TTS reading is enabled */
   public static final String TTS_ENABLED = "TTS_ENABLED";
-  
+  /** Whether High_Contrast reading is enabled */
+  public static final String HIGH_CONTRAST_ENABLED = "highContrastEnabled";
 }
