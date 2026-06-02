@@ -700,4 +700,60 @@ public class WindowManager {
     }
   }
 
+  public void applyHighContrastTheme(boolean enabled) {
+      if (enabled) {
+        Color bg      = Color.BLACK;
+        Color fg      = Color.WHITE;
+        Color inputBg = new Color(20, 20, 20);
+        Font  large   = new Font("Monospaced", Font.PLAIN, 16);
+
+        UIManager.put("Panel.background",              bg);
+        UIManager.put("Panel.foreground",              fg);
+        UIManager.put("Label.foreground",              fg);
+        UIManager.put("TextArea.background",           inputBg);
+        UIManager.put("TextArea.foreground",           fg);
+        UIManager.put("TextArea.caretForeground",      fg);
+        UIManager.put("TextPane.background",           inputBg);
+        UIManager.put("TextPane.foreground",           fg);
+        UIManager.put("TextPane.caretForeground",      fg);
+        UIManager.put("TextField.background",          inputBg);
+        UIManager.put("TextField.foreground",          fg);
+        UIManager.put("MenuBar.background",            bg);
+        UIManager.put("MenuBar.foreground",            fg);
+        UIManager.put("Menu.background",               bg);
+        UIManager.put("Menu.foreground",               fg);
+        UIManager.put("MenuItem.background",           bg);
+        UIManager.put("MenuItem.foreground",           fg);
+        UIManager.put("CheckBoxMenuItem.background",   bg);
+        UIManager.put("CheckBoxMenuItem.foreground",   fg);
+        UIManager.put("PopupMenu.background",          bg);
+        UIManager.put("PopupMenu.foreground",          fg);
+        UIManager.put("ScrollPane.background",         bg);
+        UIManager.put("Viewport.background",           bg);
+        UIManager.put("SplitPane.background",          bg);
+        UIManager.put("ToolBar.background",            bg);
+        UIManager.put("Button.background",             new Color(40, 40, 40));
+        UIManager.put("Button.foreground",             fg);
+        UIManager.put("ComboBox.background",           inputBg);
+        UIManager.put("ComboBox.foreground",           fg);
+        UIManager.put("Tree.background",               bg);
+        UIManager.put("Tree.foreground",               fg);
+        UIManager.put("Tree.textBackground",           bg);
+        UIManager.put("Tree.textForeground",           fg);
+        UIManager.put("defaultFont",                   large);
+      } else {
+          try {
+              UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+          } catch (Exception e) {
+              log.warning("[WindowManager] Could not restore default look and feel");
+          }
+      }
+
+      SettingsManager.getInstance().setSetting(
+          utils.Settings.HIGH_CONTRAST_ENABLED, String.valueOf(enabled));
+
+      SwingUtilities.updateComponentTreeUI(mainScreenFrame);
+      mainScreenFrame.repaint();
+  }
+
 } // end WindowManager
