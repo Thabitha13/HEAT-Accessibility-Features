@@ -21,6 +21,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import javax.swing.JCheckBoxMenuItem;
+import managers.SettingsManager;
+import managers.WindowManager;
+import utils.Settings;
+
 // import com.apple.eawt.Application;
 
 
@@ -56,6 +61,10 @@ public class MainMenu {
   private JMenu jMenuHelp = new JMenu();
   private JMenuItem jMenuItemContents = new JMenuItem();
   private JMenuItem jMenuItemAbout = new JMenuItem();
+
+  /* Accessibility menu items */
+  private JMenu jMenuAccessibility = new JMenu();
+  private JCheckBoxMenuItem jMenuItemHighContrast = new JCheckBoxMenuItem();
 
   private ActionManager.UndoAction undoAction = ActionManager.getInstance()
                                                              .getUndoAction();
@@ -156,10 +165,26 @@ public class MainMenu {
     jMenuHelp.addSeparator();
     jMenuHelp.add(jMenuItemAbout);
 
+    /* Accessibility Menu */
+    jMenuAccessibility.setText("Accessibility");
+    jMenuAccessibility.setMnemonic('A');
+
+    boolean hcEnabled = Boolean.parseBoolean(
+        SettingsManager.getInstance().getSetting(Settings.HIGH_CONTRAST_ENABLED));
+    jMenuItemHighContrast.setText("High Contrast Mode");
+    jMenuItemHighContrast.setMnemonic('H');
+    jMenuItemHighContrast.setSelected(hcEnabled);
+    jMenuItemHighContrast.addActionListener(e -> {
+        boolean selected = jMenuItemHighContrast.isSelected();
+        WindowManager.getInstance().applyHighContrastTheme(selected);
+    });
+    jMenuAccessibility.add(jMenuItemHighContrast);
+
     /* Main Bar */
     jMenuBar.add(jMenuFile);
     jMenuBar.add(jMenuEdit);
     jMenuBar.add(jMenuRun);
+    jMenuBar.add(jMenuAccessibility);
     jMenuBar.add(jMenuHelp);
     
     // Mac specific stuff
