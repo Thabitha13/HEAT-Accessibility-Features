@@ -97,6 +97,12 @@ public class ActionManager {
 	      Resources.getIcon("filefind22"), "Find text in the program",
 	      new Integer(KeyEvent.VK_F),
 	      KeyStroke.getKeyStroke(KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+  
+
+  private EditSelectAllAction editSelectAllAction = new EditSelectAllAction("Select All",
+      Resources.getIcon("editcopy16"), "Select all text", new Integer(KeyEvent.VK_A),
+      KeyStroke.getKeyStroke(KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+
   private EditCutAction editCutAction = new EditCutAction("Cut",
 	      Resources.getIcon("editcut16"), "Cut selected text", new Integer(KeyEvent.VK_X),
 	      KeyStroke.getKeyStroke(KeyEvent.VK_X, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
@@ -162,6 +168,7 @@ public class ActionManager {
       KeyStroke.getKeyStroke(KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
   private GoToPastConsoleHistory goToPastConsoleHistory =new GoToPastConsoleHistory();
   private GoToRecentConsoleHistory goToRecentConsoleHistory=new GoToRecentConsoleHistory();
+  private KeyboardGuideAction keyboardGuideAction = new KeyboardGuideAction();
   
   private SaveOptionsAction saveOptionsAction = new SaveOptionsAction("Apply",
 	      Resources.getIcon(""), "Apply options",
@@ -206,6 +213,10 @@ public class ActionManager {
 	    return toolbarCloseFileAction;
   }
 
+  public ActionManager.EditSelectAllAction getEditSelectAllAction() {
+    return editSelectAllAction;
+  }
+  
   public ActionManager.EditCopyAction getEditCopyAction() {
     return editCopyAction;
   }
@@ -350,6 +361,10 @@ public class ActionManager {
   public ActionManager.GoToRecentConsoleHistory getGoToRecentConsoleHistory(){
 	  return goToRecentConsoleHistory;
   }
+
+  public ActionManager.KeyboardGuideAction getKeyboardGuideAction() {
+    return keyboardGuideAction;
+}
 
     /* The Action SubClasses Follow  */
   /*
@@ -871,6 +886,22 @@ public class ActionManager {
       wm.getEditorWindow().cut();
     }
   } /* end EditCutAction */
+  
+    protected class EditSelectAllAction extends AbstractAction {
+    public EditSelectAllAction(String text, ImageIcon icon, String desc,
+      Integer mnemonic, KeyStroke accelerator) {
+      super(text, icon);
+      putValue(SHORT_DESCRIPTION, desc);
+      putValue(MNEMONIC_KEY, mnemonic);
+      putValue(ACCELERATOR_KEY, accelerator);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      WindowManager wm = WindowManager.getInstance();
+      wm.getEditorWindow().selectAll();
+    }
+  } /* end EditSelectAllAction */
+  
   protected class EditPasteAction extends AbstractAction {
     public EditPasteAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
@@ -1144,7 +1175,21 @@ public class ActionManager {
       
     }
     
-    
+  /**
+ * KeyboardGuideAction - reads all keyboard shortcuts aloud via TTS.
+ * Activated by pressing F1.
+ */
+protected class KeyboardGuideAction extends AbstractAction {
+    public KeyboardGuideAction() {
+        super("Keyboard Shortcuts");
+        putValue(SHORT_DESCRIPTION, "Read keyboard shortcuts aloud");
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        accessibility.KeyboardGuide.readShortcuts();
+    }
+}
     
     
 } /* end ActionManger */

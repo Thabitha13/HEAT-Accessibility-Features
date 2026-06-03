@@ -138,6 +138,14 @@ public class EditorWindow {
     log.warning("pasted: " + getSelectedText());
  }
 
+
+    /**
+   * Selects all text in the editor
+   */
+  public void selectAll() {
+    jtaCodeView.select(0, jtaCodeView.getDocumentLength());
+  }
+
   /**
    * Get the JEditTextArea associated with this windoe
    *
@@ -245,6 +253,17 @@ public class EditorWindow {
     
     //sets the popup menu field of the JEditTextArea to the menu just created
     jtaCodeView.setRightClickPopup(popMenu);
+
+// Add Command+A select all keyboard shortcut
+    jtaCodeView.getInputMap().put(
+        KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+        "selectAll");
+    jtaCodeView.getActionMap().put("selectAll", new javax.swing.AbstractAction() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            jtaCodeView.select(0, jtaCodeView.getDocumentLength());
+        }
+    });
     
     jtaCodeView.setHorizontalScrollBarEnabled(enabled);
     setEnabled(false);

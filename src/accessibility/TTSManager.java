@@ -18,6 +18,8 @@ public class TTSManager {
     private BlockingQueue<String> speechQueue = new LinkedBlockingQueue<String>();
     private boolean isSpeaking = false;
     private boolean startupComplete = false;
+    private boolean focusAnnouncementsEnabled = false;
+  
 
     protected TTSManager() {
         /* Exists to prevent instantiation */
@@ -36,9 +38,34 @@ public class TTSManager {
      * Called after HEAT has finished initialising.
      * Prevents TTS from speaking during startup sequence.
      */
+
+
     public void setStartupComplete() {
         startupComplete = true;
-        speak("Welcome to HEAT. Open a Haskell file to begin.");
+        speak("Welcome to HEAT. Press " + modifier() + " O to open a Haskell file. Press F1 for all keyboard shortcuts.");
+        new Thread(new Runnable() {
+            public void run() {
+                try { Thread.sleep(4000); } catch (Exception e) {}
+                focusAnnouncementsEnabled = true;
+            }
+        }).start();
+}
+
+    public boolean isFocusAnnouncementsEnabled() {
+        return focusAnnouncementsEnabled;
+}
+
+    public boolean isStartupComplete() {
+    return startupComplete;
+}
+
+    /**
+ * Returns the platform modifier key name for TTS announcements.
+ * Returns "Command" on macOS and "Control" on Windows and Linux.
+ */
+    public static String modifier() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("mac") ? "Command" : "Control";
     }
 
     /**
@@ -116,16 +143,7 @@ public class TTSManager {
         isSpeaking = false;
     }
 
-    /**
-     * Buffers characters from the interpreter stream.
-     * Speaks simplified error explanation when a complete line is received.
-     * Only speaks error lines, warnings, key status lines, and results.
-     */
-   /**
- * Buffers characters from the interpreter stream.
- * Speaks simplified error explanation when a complete line is received.
- * Only speaks error lines, warnings, key status lines, and results.
- */
+
 
     /**
  * Buffers characters from the interpreter stream.

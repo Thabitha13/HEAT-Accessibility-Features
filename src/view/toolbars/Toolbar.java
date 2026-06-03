@@ -97,6 +97,30 @@ public class Toolbar {
     statusButton.setText("Status");
     statusButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     setCompileStatus(1);
+      openButton.getAccessibleContext().setAccessibleName("Open file. Keyboard shortcut Command O");
+      closeButton.getAccessibleContext().setAccessibleName("Close file");
+      compileButton.getAccessibleContext().setAccessibleName("Compile. Keyboard shortcut F5");
+      interruptButton.getAccessibleContext().setAccessibleName("Interrupt. Keyboard shortcut F6");
+      testButton.getAccessibleContext().setAccessibleName("Run tests. Keyboard shortcut F7");
+      undoButton.getAccessibleContext().setAccessibleName("Undo. Keyboard shortcut Command Z");
+      redoButton.getAccessibleContext().setAccessibleName("Redo. Keyboard shortcut Command Shift Z");
+      cutButton.getAccessibleContext().setAccessibleName("Cut. Keyboard shortcut Command X");
+      copyButton.getAccessibleContext().setAccessibleName("Copy. Keyboard shortcut Command C");
+      pasteButton.getAccessibleContext().setAccessibleName("Paste. Keyboard shortcut Command V");
+      searchButton.getAccessibleContext().setAccessibleName("Find. Keyboard shortcut Command F");
+      toolBar.setFocusTraversalPolicyProvider(true);
+        String mod = accessibility.TTSManager.modifier();
+        addTTSFocusListener(openButton, "Open file. Press " + mod + " O");
+        addTTSFocusListener(compileButton, "Compile button. Press F5");
+        addTTSFocusListener(interruptButton, "Interrupt button. Press F6");
+        addTTSFocusListener(testButton, "Test button. Press F7");
+        addTTSFocusListener(undoButton, "Undo button. Press " + mod + " Z");
+        addTTSFocusListener(redoButton, "Redo button. Press " + mod + " Shift Z");
+        addTTSFocusListener(cutButton, "Cut button. Press " + mod + " X");
+        addTTSFocusListener(copyButton, "Copy button. Press " + mod + " C");
+        addTTSFocusListener(pasteButton, "Paste button. Press " + mod + " V");
+        addTTSFocusListener(searchButton, "Find button. Press " + mod + " F");
+  
   }
 
   /**
@@ -135,6 +159,21 @@ public class Toolbar {
 	  	case 2: statusButton.setIcon(iiCompileUnknown); break;
 	  	case 3: statusButton.setIcon(iiWorking); break;
 	  }
-  } 
+  }
+
+  /**
+ * Adds a TTS focus listener to a button.
+ * Speaks the description when the button gains keyboard focus.
+ */
+  private void addTTSFocusListener(JButton button, final String description) {
+    button.addFocusListener(new java.awt.event.FocusAdapter() {
+        public void focusGained(java.awt.event.FocusEvent e) {
+            System.out.println("DEBUG focus gained: " + description + " startupComplete=" + accessibility.TTSManager.getInstance().isStartupComplete()); // TEMP DEBUG
+            if (!e.isTemporary() && accessibility.TTSManager.getInstance().isFocusAnnouncementsEnabled()) {
+                accessibility.TTSManager.getInstance().speak(description);
+            }
+        }
+    });
+}
   
 }

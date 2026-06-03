@@ -53,6 +53,7 @@ public class DefaultInputHandler extends InputHandler {
     addKeyBinding("HOME", HOME);
     addKeyBinding("END", END);
     addKeyBinding("C+A", SELECT_ALL);
+    addKeyBinding("M+A", SELECT_ALL);
     addKeyBinding("S+HOME", SELECT_HOME);
     addKeyBinding("S+END", SELECT_END);
     addKeyBinding("C+HOME", DOCUMENT_HOME);
@@ -118,6 +119,12 @@ public class DefaultInputHandler extends InputHandler {
     
     addKeyBinding ("C+T", ActionManager.getInstance().getTestAction());
     addKeyBinding ("M+T", ActionManager.getInstance().getTestAction());
+
+        // F-key shortcuts for accessibility — work even when editor has focus
+    addKeyBinding ("F5", ActionManager.getInstance().getCompileAction());
+    addKeyBinding ("F6", ActionManager.getInstance().getInterruptAction());
+    addKeyBinding ("F7", ActionManager.getInstance().getTestAction());
+    addKeyBinding ("F1", ActionManager.getInstance().getKeyboardGuideAction());
   }
 
   /**

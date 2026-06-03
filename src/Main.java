@@ -79,8 +79,13 @@ public static void main(String[] args) {
         wm.onlyConsole();
         wm.getConsoleWindow().getFocus();
     }
-    accessibility.TTSManager.getInstance().setStartupComplete();
     wm.setVisible();
+    new Thread(new Runnable() {
+        public void run() {
+            try { Thread.sleep(2000); } catch (Exception e) {}
+            accessibility.TTSManager.getInstance().setStartupComplete();
+        }
+    }).start();
    }
 }
   

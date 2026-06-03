@@ -127,7 +127,7 @@ public class WindowManager {
           case UNCOMPILED:
             log.info("[WindowManager]: setStatusUncompiled");
             toolbar.setCompileStatus(2);
-            accessibility.TTSManager.getInstance().speak("Program not compiled. Press compile to load."); // TTS
+            accessibility.TTSManager.getInstance().speak("Program not compiled. Press F5 to compile."); // TTS
             consoleWindow.setEnabled(false);
             displayWindow.setEnabled(true);
             setCompileEnabled(true);
@@ -417,6 +417,19 @@ public class WindowManager {
 
       /* centers frame */
       mainScreenFrame.setLocationRelativeTo(null);
+
+      // F10 moves focus to toolbar for keyboard navigation
+      mainScreenFrame.getRootPane().getInputMap(
+          javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+          javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F10, 0), "focusToolbar");
+      mainScreenFrame.getRootPane().getActionMap().put("focusToolbar",
+          new javax.swing.AbstractAction() {
+              public void actionPerformed(java.awt.event.ActionEvent e) {
+                  toolbar.getToolBar().getComponent(0).requestFocusInWindow();
+                  accessibility.TTSManager.getInstance().speak(
+                      "Toolbar focused. Press Tab to move between buttons.");
+              }
+          });
 
       
       setStatusNotCompiled();
