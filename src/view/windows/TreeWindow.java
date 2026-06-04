@@ -151,6 +151,28 @@ public class TreeWindow
     {
         return treePanel;
     }
+    /**
+     * Sets the font size of the overview tree (left sidebar) and grows the
+     * row height so larger text is not clipped.
+     *
+     * @param ptSize desired font size
+     */
+    public void setFontSize(int ptSize) {
+        java.awt.Font base = tree.getFont();
+        if (base == null) {
+            base = new java.awt.Font("SansSerif", java.awt.Font.PLAIN, ptSize);
+        }
+        java.awt.Font f = base.deriveFont((float) ptSize);
+        tree.setFont(f);
+        // push the same font onto the custom cell renderer so the labels actually resize
+        javax.swing.tree.TreeCellRenderer r = tree.getCellRenderer();
+        if (r instanceof java.awt.Component) {
+            ((java.awt.Component) r).setFont(f);
+        }
+        tree.setRowHeight(Math.max(ptSize + 8, 20));
+        tree.revalidate();
+        tree.repaint();
+    }
 
     private void createNodes(DefaultMutableTreeNode top)
     {
