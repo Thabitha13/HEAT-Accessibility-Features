@@ -29,12 +29,14 @@ import view.dialogs.FileDialogs;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.File;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -43,6 +45,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import accessibility.ColorThemeManager;
 
 
 /**
@@ -57,6 +60,7 @@ public class OptionsWindow {
   private JTextField jTextFieldTestFunction;
   private JTextField jTextFieldTestPositive;
   private JComboBox jcbOutputFontSize;
+  private JCheckBox jCheckBoxDeuteranopia;
   private JComboBox jcbCodeFontSize;
   private JDialog dialog;
 
@@ -94,14 +98,12 @@ public class OptionsWindow {
     jTextFieldInterpreterPath = new JTextField();
     panelInterpreter.add(jTextFieldInterpreterPath);
     panelInterpreter.add(new JSeparator(SwingConstants.HORIZONTAL));
-    // panelInterpreter.add(new JLabel("")); // some vertical space
     JPanel panelOptionsInfo = new JPanel();
     panelOptionsInfo.add(new JLabel("Command line options for the Haskell interpreter:"));
     panelInterpreter.add(panelOptionsInfo);
     jTextFieldOptions = new JTextField();
     panelInterpreter.add(jTextFieldOptions);
     panelInterpreter.add(new JSeparator(SwingConstants.HORIZONTAL));
-    // panelInterpreter.add(new JLabel("")); // some vertical space
     JButton browseL = new JButton("Browse");
     browseL.setToolTipText("Browse for directory");
     browseL.addActionListener(new ActionListener() {
@@ -124,7 +126,6 @@ public class OptionsWindow {
     jTextFieldTestFunction = new JTextField();
     testFunction.add(jTextFieldTestFunction);
     panelTest.add(testFunction);
-    // panelTest.add(new JLabel(""));  // some vertical space
     panelTest.add(new JSeparator(SwingConstants.HORIZONTAL));
     JPanel testPositive = new JPanel(new GridLayout(0,1));
     testPositive.add(new JLabel("String that appears in successful test output"));
@@ -137,8 +138,8 @@ public class OptionsWindow {
     JPanel panelFontSizes = new JPanel(new GridLayout(0,1));
     jcbOutputFontSize = new JComboBox();
     jcbCodeFontSize = new JComboBox();
- /* Populate the font size combo boxes */
-    for (int i = 10; i <37 ; i++) {
+/* Populate the font size combo boxes */
+    for (int i = 10; i < 37; i++) {
       jcbOutputFontSize.addItem(String.valueOf(i));
       jcbCodeFontSize.addItem(String.valueOf(i));
     }
@@ -150,12 +151,20 @@ public class OptionsWindow {
     interpreterFontSize.add(jcbOutputFontSize);
     panelFontSizes.add(editorFontSize);
     panelFontSizes.add(interpreterFontSize);
+
+    // panel for accessibility settings
+    jCheckBoxDeuteranopia = new JCheckBox("Enable Deuteranopia (red-green) colour mode");
+    jCheckBoxDeuteranopia.setSelected(ColorThemeManager.isDeuteranopiaEnabled());
+    JPanel accessibilityPanel = new JPanel();
+    accessibilityPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+    accessibilityPanel.add(jCheckBoxDeuteranopia);
     
     // combine panels on tabbed pane
     JTabbedPane tabOptions = new JTabbedPane();
     tabOptions.addTab("Haskell Interpreter", panelInterpreter);
     tabOptions.addTab("Property Tests", panelTest);
     tabOptions.addTab("Font Sizes", panelFontSizes);
+    tabOptions.addTab("Accessibility", accessibilityPanel);
     
     // buttons for applying options and cancellation
     JButton buttonApply = new JButton("Apply");
@@ -173,11 +182,9 @@ public class OptionsWindow {
     
     // put all together
     panelOptions = new JPanel(new BorderLayout());
-    panelOptions.add(tabOptions,BorderLayout.CENTER);
-    panelOptions.add(panelButtons,BorderLayout.PAGE_END);
+    panelOptions.add(tabOptions, BorderLayout.CENTER);
+    panelOptions.add(panelButtons, BorderLayout.PAGE_END);
   }
-
- 
 
   /**
    * Displays the options window
@@ -187,7 +194,7 @@ public class OptionsWindow {
 
     dialog = new JDialog(wm.getMainScreenFrame(), "Options");
     dialog.setModal(true);
-    dialog.getContentPane().add(panelOptions);      //(jTabbedPane1);
+    dialog.getContentPane().add(panelOptions);
     dialog.setMinimumSize(new Dimension(500,350));
     dialog.setSize(600, 400);
     dialog.setLocationRelativeTo(wm.getMainScreenFrame());
@@ -213,13 +220,11 @@ public class OptionsWindow {
     jTextFieldTestPositive.setText(sm.getSetting(Settings.TEST_POSITIVE));
     jcbOutputFontSize.setSelectedItem(sm.getSetting(Settings.OUTPUT_FONT_SIZE));
     jcbCodeFontSize.setSelectedItem(sm.getSetting(Settings.CODE_FONT_SIZE));
+    jCheckBoxDeuteranopia.setSelected("true".equals(sm.getSetting(Settings.DEUTERANOPIA_MODE)));
   }
 
- 
   /**
    * Returns the current Interpreter path
-   *
-   * @return the Interpreter path
    */
   public String getInterpreterPath() {
     return jTextFieldInterpreterPath.getText();
@@ -227,8 +232,6 @@ public class OptionsWindow {
   
   /**
    * Returns the Interpreter options
-   *
-   * @return the Interpreter options
    */
   public String getInterpreterOpts() {
     return jTextFieldOptions.getText();
@@ -236,25 +239,21 @@ public class OptionsWindow {
 
   /**
    * Returns the location for temporary files
-   *
-   * @return the location for temporary files
    */
   public String getLibraryPath() {
     return jTextFieldLibraryPath.getText();
   }
   
   public String getTestFunction() {
-      return jTextFieldTestFunction.getText();
+    return jTextFieldTestFunction.getText();
   }
 
   public String getTestPositive() {
-      return jTextFieldTestPositive.getText();
+    return jTextFieldTestPositive.getText();
   }
   
   /**
    * Returns the desired font size for output window
-   *
-   * @return the output window font size
    */
   public String getOuputFontSize() {
     return (String) jcbOutputFontSize.getSelectedItem();
@@ -262,22 +261,22 @@ public class OptionsWindow {
 
   /**
    * Returns the desired font size for display window
-   *
-   * @return the display window font size
    */
   public String getCodeFontSize() {
     return (String) jcbCodeFontSize.getSelectedItem();
+  }
+
+  /**
+   * Returns whether deuteranopia colour mode is enabled in the UI
+   */
+  public boolean isDeuteranopiaEnabled() {
+    return jCheckBoxDeuteranopia.isSelected();
   }
 
   private void jButton2_actionPerformed(ActionEvent e) {
     close();
   }
 
-//  private void jbUpdate_actionPerformed(ActionEvent e) {
-//    close();
-//  }
-
-  
   /**
    * Browse for an interpreter file with full path
    */

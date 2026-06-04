@@ -13,16 +13,13 @@
 
 //import com.incors.plaf.alloy.AlloyLookAndFeel;
 
-import managers.FileManager;
 import managers.InterpreterManager;
 import managers.SettingsManager;
 import managers.WindowManager;
 import managers.UndoManager;
 import java.util.logging.Logger;
 import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.SimpleFormatter;
-import java.util.logging.Level;
 import java.io.File;
 
 /**
@@ -52,6 +49,8 @@ public static void main(String[] args) {
     WindowManager wm = WindowManager.getInstance();
 
     sm.loadSettings();
+    boolean deuteranopia = "true".equals(sm.getSetting(utils.Settings.DEUTERANOPIA_MODE));
+    accessibility.ColorThemeManager.setDeuteranopiaMode(deuteranopia);
     WindowManager.setLookAndFeel();
     wm.createGUI();
 

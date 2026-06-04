@@ -37,9 +37,8 @@ import javax.swing.KeyStroke;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-//import accessibility.ColorThemeManager;
+import accessibility.ColorThemeManager;
 import accessibility.FontSizeManager;
-
 /**
  * The manager Class responsible for all GUI action commands
  */
@@ -720,7 +719,7 @@ public ActionManager.DecreaseFontSizeAction getDecreaseFontSizeAction() {
       SettingsManager sm = SettingsManager.getInstance();
       InterpreterManager im = InterpreterManager.getInstance();
 
-      if (!(sameSetting(sm.getSetting(Settings.INTERPRETER_PATH), interpreterPath)
+if (!(sameSetting(sm.getSetting(Settings.INTERPRETER_PATH), interpreterPath)
               && sameSetting(sm.getSetting(Settings.INTERPRETER_OPTS), interpreterOpts)
               && sameSetting(sm.getSetting(Settings.LIBRARY_PATH), libraryPath))) {
         sm.setSetting(Settings.INTERPRETER_PATH, interpreterPath);
@@ -750,6 +749,10 @@ public ActionManager.DecreaseFontSizeAction getDecreaseFontSizeAction() {
         log.warning("[ActionManager] - Failed to parse " +
           Settings.CODE_FONT_SIZE + " setting from options window");
       }
+boolean deuteranopiaEnabled = wm.getOptionsWindow().isDeuteranopiaEnabled();
+      ColorThemeManager.setDeuteranopiaMode(deuteranopiaEnabled);
+      sm.setSetting(Settings.DEUTERANOPIA_MODE, String.valueOf(deuteranopiaEnabled));
+      wm.getConsoleWindow().refreshStyles();
 
       wm.getOptionsWindow().close();
       sm.saveSettings();

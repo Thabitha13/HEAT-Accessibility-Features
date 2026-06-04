@@ -53,5 +53,8 @@ public class Settings {
   public static final String TEST_FUNCTION = "TEST_FUNCTION";
   
   public static final String TEST_POSITIVE = "TEST_POSITIVE";
-  
+  /**
+   * Whether deuteranopia colour mode is enabled
+   */
+  public static final String DEUTERANOPIA_MODE = "DEUTERANOPIA_MODE";
 }
