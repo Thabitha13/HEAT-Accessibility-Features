@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -17,22 +18,21 @@ package managers;
 
 import java.util.logging.Logger;
 
-import utils.HaskellFilter;
 import utils.Resources;
 import utils.Settings;
-import utils.InterpreterParser;
 
-import view.dialogs.SystemDialogs;
+import view.dialogs.KeyboardNewFileDialog;
+import view.dialogs.KeyboardOpenFileDialog;
 import view.windows.*;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.undo.CannotRedoException;
@@ -50,96 +50,105 @@ public class ActionManager {
   
   // file/program actions
   private ExitProgramAction exitProgramAction = new ExitProgramAction("Quit",
-      Resources.getIcon("exit16"), "Quit HEAT", new Integer(KeyEvent.VK_Q),
-      KeyStroke.getKeyStroke(KeyEvent.VK_Q, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      Resources.getIcon("exit16"), "Quit HEAT", KeyEvent.VK_Q,
+      KeyStroke.getKeyStroke(KeyEvent.VK_Q, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private ExitProgramAction toolbarExitProgramAction = new ExitProgramAction(null,
-      Resources.getIcon("exit22"), "Quit HEAT", new Integer(KeyEvent.VK_Q),
-      KeyStroke.getKeyStroke(KeyEvent.VK_Q, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      Resources.getIcon("exit22"), "Quit HEAT", KeyEvent.VK_Q,
+      KeyStroke.getKeyStroke(KeyEvent.VK_Q, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
+  private NewFileAction newFileAction = new NewFileAction("New..",
+      Resources.getIcon("windownew22"), "Create a new Haskell file",
+      KeyEvent.VK_N,
+      KeyStroke.getKeyStroke(KeyEvent.VK_N, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
+  private FileExplorerAction fileExplorerAction = new FileExplorerAction("Navigate Files..",
+      Resources.getIcon("filefind16"), "Search and navigate Haskell files",
+      KeyEvent.VK_F,
+      KeyStroke.getKeyStroke(KeyEvent.VK_F,
+          java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK, false));
   private OpenFileAction openFileAction = new OpenFileAction("Open..",
-      Resources.getIcon("fileopen16"), "Open an existing or new file in the editor",
-      new Integer(KeyEvent.VK_O),
-      KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      Resources.getIcon("fileopen16"), "Open an existing Haskell file",
+      KeyEvent.VK_O,
+      KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private OpenFileAction toolbarOpenFileAction = new OpenFileAction(null,
-      Resources.getIcon("fileopen22"), "Open an existing or new file in the editor",
-      new Integer(KeyEvent.VK_O),
-      KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      Resources.getIcon("fileopen22"), "Open an existing Haskell file",
+      KeyEvent.VK_O,
+      KeyStroke.getKeyStroke(KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private CloseFileAction closeFileAction = new CloseFileAction("Close",
 	      Resources.getIcon("fileclose16"), "Save file and close editor", null, null);
   private CloseFileAction toolbarCloseFileAction = new CloseFileAction(null,
 	      Resources.getIcon("fileclose22"), "Save file and close editor", null, null);
   private PrintFileAction printFileAction = new PrintFileAction("Print",
 		  Resources.getIcon("fileprint16"), "Print editor content or interpreter console",
-	      new Integer(KeyEvent.VK_P),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_P, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      KeyEvent.VK_P,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_P, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private ShowOptionsAction showOptionsAction = new ShowOptionsAction("Options",
 	      Resources.getIcon("list16"), "Change HEAT Options",
-	      new Integer(KeyEvent.VK_D),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      KeyEvent.VK_D,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
 
   // editing actions
   private UndoAction undoAction = new UndoAction("Undo", Resources.getIcon("undo16"),
-	      "Undo last change", new Integer(KeyEvent.VK_Z),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      "Undo last change", KeyEvent.VK_Z,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private UndoAction toolbarUndoAction = new UndoAction(null, Resources.getIcon("undo22"),
-	      "Undo last change", new Integer(KeyEvent.VK_Z),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      "Undo last change", KeyEvent.VK_Z,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private RedoAction redoAction = new RedoAction("Redo", Resources.getIcon("redo16"),
-	      "Redo last change", new Integer(KeyEvent.VK_Y),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      "Redo last change", KeyEvent.VK_Y,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private RedoAction toolbarRedoAction = new RedoAction(null, Resources.getIcon("redo22"),
-	      "Redo last change", new Integer(KeyEvent.VK_Y),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      "Redo last change", KeyEvent.VK_Y,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private ShowSearchAction showSearchAction = new ShowSearchAction("Find",
 	      Resources.getIcon("filefind16"), "Find text in the program",
-	      new Integer(KeyEvent.VK_F),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      KeyEvent.VK_F,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private ShowSearchAction toolbarSearchAction = new ShowSearchAction(null,
 	      Resources.getIcon("filefind22"), "Find text in the program",
-	      new Integer(KeyEvent.VK_F),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      KeyEvent.VK_F,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditCutAction editCutAction = new EditCutAction("Cut",
-	      Resources.getIcon("editcut16"), "Cut selected text", new Integer(KeyEvent.VK_X),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_X, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editcut16"), "Cut selected text", KeyEvent.VK_X,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_X, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditCutAction toolbarEditCutAction = new EditCutAction(null,
-	      Resources.getIcon("editcut22"), "Cut selected text", new Integer(KeyEvent.VK_X),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_X, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editcut22"), "Cut selected text", KeyEvent.VK_X,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_X, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditCopyAction editCopyAction = new EditCopyAction("Copy",
-	      Resources.getIcon("editcopy16"), "Copy selected text", new Integer(KeyEvent.VK_C),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editcopy16"), "Copy selected text", KeyEvent.VK_C,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditCopyAction toolbarEditCopyAction = new EditCopyAction(null,
-	      Resources.getIcon("editcopy22"), "Copy selected text", new Integer(KeyEvent.VK_C),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editcopy22"), "Copy selected text", KeyEvent.VK_C,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_C, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditPasteAction editPasteAction = new EditPasteAction("Paste",
-	      Resources.getIcon("editpaste16"), "Paste selected text", new Integer(KeyEvent.VK_V),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editpaste16"), "Paste selected text", KeyEvent.VK_V,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private EditPasteAction toolbarEditPasteAction = new EditPasteAction(null,
-	      Resources.getIcon("editpaste22"), "Paste selected text", new Integer(KeyEvent.VK_V),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon("editpaste22"), "Paste selected text", KeyEvent.VK_V,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_V, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
 
   // run actions
   private CompileAction compileAction = new CompileAction(null,
-		  	Resources.getIcon("reload16"), "Load & compile program", new Integer(KeyEvent.VK_L),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("reload16"), "Load & compile program", KeyEvent.VK_L,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private CompileAction toolbarCompileAction = new CompileAction(null,
-		  	Resources.getIcon("reload22"), "Load program into interpreter and compile it", new Integer(KeyEvent.VK_L),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("reload22"), "Load program into interpreter and compile it", KeyEvent.VK_L,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private InterruptAction interruptAction = new InterruptAction(null, 
-		  	Resources.getIcon("stop16"), "Interrupt interpreter", new Integer(KeyEvent.VK_I),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_I, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("stop16"), "Interrupt interpreter", KeyEvent.VK_I,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_I, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private InterruptAction toolbarInterruptAction = new InterruptAction(null, 
-		  	Resources.getIcon("stop22"), "Interrupt interpreter", new Integer(KeyEvent.VK_I),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_I, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("stop22"), "Interrupt interpreter", KeyEvent.VK_I,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_I, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private TestAction testAction = new TestAction(null, 
-		  	Resources.getIcon("debug16"), "Check properties", new Integer(KeyEvent.VK_T),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("debug16"), "Check properties", KeyEvent.VK_T,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private TestAction toolbarTestAction = new TestAction(null, 
-		  	Resources.getIcon("debug22"), "Check properties", new Integer(KeyEvent.VK_T),
-		    KeyStroke.getKeyStroke(KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+		  	Resources.getIcon("debug22"), "Check properties", KeyEvent.VK_T,
+		    KeyStroke.getKeyStroke(KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
 
   // help actions
   private ShowHelpAction showHelpAction = new ShowHelpAction("Help",
-      Resources.getIcon("help16"), "Display help", new Integer(KeyEvent.VK_L),
-      KeyStroke.getKeyStroke(KeyEvent.VK_H, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      Resources.getIcon("help16"), "Display help", KeyEvent.VK_L,
+      KeyStroke.getKeyStroke(KeyEvent.VK_H, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private ShowAboutAction showAboutAction = new ShowAboutAction("About",
       Resources.getIcon("info16"), "Display about information", null, null);
   
@@ -158,18 +167,18 @@ public class ActionManager {
   // for the console window:
   private SendEvaluationAction sendEvaluationAction = new SendEvaluationAction("Send",
       Resources.getIcon("effect16"), "Sends Evaluation to Interpreter",
-      new Integer(KeyEvent.VK_E),
-      KeyStroke.getKeyStroke(KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+      KeyEvent.VK_E,
+      KeyStroke.getKeyStroke(KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private GoToPastConsoleHistory goToPastConsoleHistory =new GoToPastConsoleHistory();
   private GoToRecentConsoleHistory goToRecentConsoleHistory=new GoToRecentConsoleHistory();
   
   private SaveOptionsAction saveOptionsAction = new SaveOptionsAction("Apply",
 	      Resources.getIcon(""), "Apply options",
-	      new Integer(KeyEvent.VK_S),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      KeyEvent.VK_S,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
   private SaveWizardAction saveWizardAction = new SaveWizardAction("Continue",
-	      Resources.getIcon(""), "Save path and continue", new Integer(KeyEvent.VK_S),
-	      KeyStroke.getKeyStroke(KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+	      Resources.getIcon(""), "Save path and continue", KeyEvent.VK_S,
+	      KeyStroke.getKeyStroke(KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
 
   
 
@@ -194,8 +203,24 @@ public class ActionManager {
 
   /* Getters for the Action objects */
     
+  public ActionManager.NewFileAction getNewFileAction() {
+    return newFileAction;
+  }
+
+  public void triggerNewFile() {
+    newFileAction.actionPerformed(null);
+  }
+
   public ActionManager.OpenFileAction getOpenFileAction() {
     return openFileAction;
+  }
+
+  public void triggerOpenFile() {
+    openFileAction.actionPerformed(null);
+  }
+
+  public ActionManager.FileExplorerAction getFileExplorerAction() {
+    return fileExplorerAction;
   }
 
   public ActionManager.CloseFileAction getCloseFileAction() {
@@ -354,6 +379,7 @@ public class ActionManager {
     /* The Action SubClasses Follow  */
   /*
     protected class NewFileAction extends AbstractAction {
+        private static final long serialVersionUID = 1L;
         public NewFileAction(String text, ImageIcon icon, String desc,
         Integer mnemonic, KeyStroke accelerator) {
             super(text, icon);
@@ -386,7 +412,7 @@ public class ActionManager {
 
             wm.getConsoleWindow().restart();
 
-            ParserManager.getInstance().refresh();
+            ParserManager.refresh();
             wm.getTreeWindow().refreshTree();
             wm.hideTree();
 
@@ -406,6 +432,7 @@ public class ActionManager {
    *
    */
   protected class TestAction extends AbstractAction {
+	private static final long serialVersionUID = 1L;
 	public TestAction(String text, ImageIcon icon, String desc, 
 			Integer mnemonic, KeyStroke accelerator){
 	  super(text, icon); 
@@ -420,16 +447,14 @@ public class ActionManager {
             return;
           }
  
-	  InterpreterManager im=InterpreterManager.getInstance();
-	  InterpreterParser ip = InterpreterParser.getInstance();
-	  ParserManager pm = ParserManager.getInstance();
-          if (pm.getParser().getTests().size()>0){
+          if (ParserManager.getParser().getTests().size()>0){
     	    wm.getTreeWindow().runTests();
           }
 	}
   }
   
   protected class ExitProgramAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ExitProgramAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -464,7 +489,39 @@ public class ActionManager {
     }
   } /* end ExitProgramAction */
   
+  protected class NewFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public NewFileAction(String text, ImageIcon icon, String desc,
+      Integer mnemonic, KeyStroke accelerator) {
+      super(text, icon);
+      putValue(SHORT_DESCRIPTION, desc);
+      putValue(MNEMONIC_KEY, mnemonic);
+      putValue(ACCELERATOR_KEY, accelerator);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      WindowManager wm = WindowManager.getInstance();
+      FileManager fm = FileManager.getInstance();
+      fm.ensureSaved();
+
+      File newFile = KeyboardNewFileDialog.show(wm.getMainScreenFrame());
+      if (newFile == null) return;
+
+      try {
+        newFile.getParentFile().mkdirs();
+        if (!newFile.exists()) newFile.createNewFile();
+      } catch (java.io.IOException ex) {
+        JOptionPane.showMessageDialog(wm.getMainScreenFrame(),
+            "Could not create file: " + ex.getMessage(),
+            "File creation error", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      wm.openFile(newFile);
+    }
+  } /* end NewFileAction */
+
   protected class OpenFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public OpenFileAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -476,39 +533,18 @@ public class ActionManager {
     public void actionPerformed(ActionEvent e) {
       WindowManager wm = WindowManager.getInstance();
       FileManager fm = FileManager.getInstance();
-      
       fm.ensureSaved();
-      /*
-      if (wm.getEditorWindow().getSavedModStatus())
-        if (SystemDialogs.getInstance().confirmSave())
-          saveFileAction.actionPerformed(e);
-       */
 
-      HaskellFilter haskellFilter = new HaskellFilter();
-
-      JFileChooser jfc = new JFileChooser();
-      jfc.setDialogTitle("Open an existing or create a new Haskell File");
-      jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      jfc.setCurrentDirectory(fm.getOpenDirectory());
-      jfc.setAcceptAllFileFilterUsed(false);
-      jfc.setFileFilter(haskellFilter);
-
-      int result = jfc.showDialog(wm.getMainScreenFrame(),"Open/Create");
-
-      if (result == JFileChooser.CANCEL_OPTION)
-        return;
-      else if (result == JFileChooser.APPROVE_OPTION) {
-        fm.setOpenDirectory(jfc.getCurrentDirectory());
-        wm.openFile(jfc.getSelectedFile());
-      } else
-    	  JOptionPane.showMessageDialog(null, "Error opening file!",
-    			  "File Open Error", JOptionPane.ERROR_MESSAGE);
+      File selected = KeyboardOpenFileDialog.show(wm.getMainScreenFrame());
+      if (selected == null) return;
+      fm.setOpenDirectory(selected.getParentFile());
+      wm.openFile(selected);
     }
-
   } /* end OpenFileAction */
   
   /*
   protected class SaveAsFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveAsFileAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -588,6 +624,7 @@ public class ActionManager {
   
   /*
   protected class SaveFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveFileAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -619,6 +656,7 @@ public class ActionManager {
    */
   
   protected class SendEvaluationAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SendEvaluationAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -643,6 +681,7 @@ public class ActionManager {
   }
 
   protected class ShowOptionsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ShowOptionsAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -657,6 +696,7 @@ public class ActionManager {
     }
   } /* end ShowOptionsAction */
   protected class ShowSearchAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ShowSearchAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -671,6 +711,7 @@ public class ActionManager {
     }
   } /* end ShowOptionsAction */
   protected class ShowAboutAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ShowAboutAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -685,6 +726,7 @@ public class ActionManager {
     }
   } /* end ShowAboutAction */
   protected class SaveOptionsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveOptionsAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -736,6 +778,10 @@ public class ActionManager {
           Settings.CODE_FONT_SIZE + " setting from options window");
       }
     
+      sm.setSetting(Settings.HIGH_CONTRAST_MODE,
+          String.valueOf(wm.getOptionsWindow().isHighContrastSelected()));
+      wm.applyTheme();
+
       wm.getOptionsWindow().close();
       sm.saveSettings();
       
@@ -753,6 +799,7 @@ public class ActionManager {
    * Save Action of Wizard Window for Settings
    */
   protected class SaveWizardAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveWizardAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -781,6 +828,7 @@ public class ActionManager {
   
  
   protected class CloseFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public CloseFileAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -804,7 +852,7 @@ public class ActionManager {
       
       UndoManager.getInstance().reset();
      
-      ParserManager.getInstance().refresh();
+      ParserManager.refresh();
       wm.getTreeWindow().refreshTree();
 
 
@@ -815,6 +863,7 @@ public class ActionManager {
   
   
   protected class PrintFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public PrintFileAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -829,6 +878,7 @@ public class ActionManager {
     }
   } /* end PrintFileAction */
   protected class ShowHelpAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ShowHelpAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -843,6 +893,7 @@ public class ActionManager {
     }
   } /* end ShowHelpAction */
   protected class EditCopyAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public EditCopyAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -858,6 +909,7 @@ public class ActionManager {
     }
   } /* end EditCopyAction */
   protected class EditCutAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public EditCutAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -872,6 +924,7 @@ public class ActionManager {
     }
   } /* end EditCutAction */
   protected class EditPasteAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public EditPasteAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -886,6 +939,7 @@ public class ActionManager {
     }
   } /* end EditPasteAction */
   protected class CompileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public CompileAction(String text, ImageIcon icon,
       String desc, Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -915,12 +969,13 @@ public class ActionManager {
       //im.compile();
       //im.breakInterpreter();
       //wm.getTreeWindow().refreshTree(wm.getEditorWindow().getEditorContent());
-      ParserManager.getInstance().refresh();
+      ParserManager.refresh();
       wm.getTreeWindow().refreshTree();
       //wm.showTree(true);
     }
   } /* end CompileAction */
   public class UndoAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public UndoAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -961,6 +1016,7 @@ public class ActionManager {
   } /* end UndoAction */
   
   public class RedoAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public RedoAction(String text, ImageIcon icon, String desc,
       Integer mnemonic, KeyStroke accelerator) {
       super(text, icon);
@@ -1002,6 +1058,7 @@ public class ActionManager {
 
     protected class RefreshTreeAction extends AbstractAction
     {
+        private static final long serialVersionUID = 1L;
         public RefreshTreeAction(String text, ImageIcon icon, String desc)
         {
             super(text, icon);
@@ -1015,13 +1072,14 @@ public class ActionManager {
         {
             //WindowManager wm = WindowManager.getInstance();
             //wm.getTreeWindow().refreshTree(wm.getEditorWindow().getEditorContent());
-            ParserManager.getInstance().refresh();
+            ParserManager.refresh();
             WindowManager.getInstance().getTreeWindow().refreshTree();
         }
     }
 
     protected class ExpandTreeAction extends AbstractAction
     {
+        private static final long serialVersionUID = 1L;
         public ExpandTreeAction(String text, ImageIcon icon, String desc)
         {
             super(text, icon);
@@ -1041,6 +1099,7 @@ public class ActionManager {
 
     protected class CollapseTreeAction extends AbstractAction
     {
+        private static final long serialVersionUID = 1L;
         public CollapseTreeAction(String text, ImageIcon icon, String desc)
         {
             super(text, icon);
@@ -1060,6 +1119,7 @@ public class ActionManager {
 
     protected class ToggleTreeAction extends AbstractAction
     {
+        private static final long serialVersionUID = 1L;
         public ToggleTreeAction(String text, ImageIcon icon, String desc)
         {
             super(text, icon);
@@ -1077,6 +1137,7 @@ public class ActionManager {
 
     protected class ToggleConsoleAction extends AbstractAction
     {
+        private static final long serialVersionUID = 1L;
         public ToggleConsoleAction(String text, ImageIcon icon, String desc)
         {
             super(text, icon);
@@ -1098,6 +1159,7 @@ public class ActionManager {
      * 
      */
    protected class GoToPastConsoleHistory extends AbstractAction{
+      private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent arg0) {
     	  ConsoleWindow console = WindowManager.getInstance().getConsoleWindow();
     	  if (console.isEnabled())
@@ -1108,6 +1170,7 @@ public class ActionManager {
    }
     
    protected class GoToRecentConsoleHistory extends AbstractAction{
+  	  private static final long serialVersionUID = 1L;
   	  public void actionPerformed(ActionEvent arg0) {
     	  ConsoleWindow console = WindowManager.getInstance().getConsoleWindow();
     	  if (console.isEnabled())
@@ -1124,6 +1187,7 @@ public class ActionManager {
      *
      */
     protected class InterruptAction extends AbstractAction  {
+    	private static final long serialVersionUID = 1L;
     	public InterruptAction(String text, ImageIcon icon, String desc,
     		      Integer mnemonic, KeyStroke accelerator){
           super(text, icon);
@@ -1144,7 +1208,21 @@ public class ActionManager {
       
     }
     
-    
-    
-    
+  protected class FileExplorerAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public FileExplorerAction(String text, ImageIcon icon, String desc,
+      Integer mnemonic, KeyStroke accelerator) {
+      super(text, icon);
+      putValue(SHORT_DESCRIPTION, desc);
+      putValue(MNEMONIC_KEY, mnemonic);
+      putValue(ACCELERATOR_KEY, accelerator);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      WindowManager wm = WindowManager.getInstance();
+      wm.showFileExplorer();
+    }
+  } /* end FileExplorerAction */
+
+
 } /* end ActionManger */

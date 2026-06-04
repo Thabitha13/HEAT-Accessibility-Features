@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -202,7 +203,7 @@ public class EditorWindow {
 
     String fontSizeStr = sm.getSetting(Settings.CODE_FONT_SIZE);
 
-    if ((fontSizeStr != null) && (fontSizeStr != "")) {
+    if ((fontSizeStr != null) && !fontSizeStr.isEmpty()) {
       try {
         int size = Integer.parseInt(fontSizeStr);
         fontSize = size;

@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -65,8 +66,8 @@ public class HelpWindow {
   private Icon iconForward = new ImageIcon();
   private JEditorPane htmlPane;
   private URL helpURL;
-  private ArrayList nodeforward = new ArrayList();
-  private ArrayList nodeback = new ArrayList();
+  private ArrayList<javax.swing.tree.TreePath> nodeforward = new ArrayList<>();
+  private ArrayList<javax.swing.tree.TreePath> nodeback = new ArrayList<>();
   private boolean addNode = true;
   JFrame frame = new JFrame("HEAT Help");
   private JPanel jPanel2 = new JPanel();
@@ -192,7 +193,7 @@ public class HelpWindow {
     String s = Resources.getHelpFilePath("index");
 
     try {
-      helpURL = new URL(s);
+      helpURL = new java.net.URI(s).toURL();
       displayURL(helpURL);
     } catch (Exception e) {
       log.warning("[HelpWindow] - Couldn't create help URL: " + s);
@@ -261,13 +262,13 @@ public class HelpWindow {
       int currentBook = nodeback.size() - 1;
       nodeforward.add(nodeback.get(currentBook)); // add current book to forward
 
-      TreePath currentpath = (TreePath) nodeback.get(currentBook);
+      TreePath currentpath = nodeback.get(currentBook);
 
       nodeback.remove(currentBook);
 
       int lastBook = nodeback.size() - 1;
 
-      TreePath nextpath = (TreePath) nodeback.get(lastBook);
+      javax.swing.tree.TreePath nextpath = nodeback.get(lastBook);
 
       if (!(nextpath.getParentPath().equals(currentpath.getParentPath())))
         tree.collapsePath(currentpath.getParentPath());
@@ -282,7 +283,7 @@ public class HelpWindow {
       int currentBook = nodeforward.size() - 1;
       nodeback.add(nodeforward.get(currentBook)); // add current book to back
 
-      TreePath currentpath = (TreePath) nodeforward.get(currentBook);
+      TreePath currentpath = nodeforward.get(currentBook);
 
       addNode = false;
       tree.setSelectionPath(currentpath);
@@ -306,8 +307,8 @@ public class HelpWindow {
       bookName = book;
 
       try {
-        bookURL = new URL(s);
-      } catch (java.net.MalformedURLException exc) {
+        bookURL = new java.net.URI(s).toURL();
+      } catch (java.net.MalformedURLException | java.net.URISyntaxException exc) {
         log.warning(
           "[HelpWindow] - Attempted to create a BookInfo with a bad URL: " +
           bookURL);

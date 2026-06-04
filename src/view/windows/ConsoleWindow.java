@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -122,7 +123,7 @@ public class ConsoleWindow {
     /* Use font size from settings if it exists */
     String fontSize = sm.getSetting(Settings.OUTPUT_FONT_SIZE);
 
-    if ((fontSize != null) && (fontSize != "")) {
+    if ((fontSize != null) && !fontSize.isEmpty()) {
       try {
         int size = Integer.parseInt(fontSize);
         displayFont = new Font(Font.MONOSPACED, Font.PLAIN, size);
@@ -469,7 +470,7 @@ public class ConsoleWindow {
 	    	if (im.isStartOfPrompt(c)) {
 	    		// record test result
 	    		log.warning("[ConsoleWindow] testing: record test result " + currentTest);
-	    		utils.parser.ParsedTest test = (utils.parser.ParsedTest) managers.ParserManager.getParser().getTests().get(currentTest);
+	    		utils.parser.ParsedTest test = managers.ParserManager.getParser().getTests().get(currentTest);
 	    		if (buffer.indexOf(sm.getSetting(Settings.TEST_POSITIVE)) != -1) {
 	    			test.setState("testPassed");
 	    		} else {
@@ -519,6 +520,7 @@ public class ConsoleWindow {
                     }
                 } else {
                     wm.restoreStatus();
+                    wm.notifyInterpreterReady();
                 }
 	    	compiling = false;
 	    	error = false;

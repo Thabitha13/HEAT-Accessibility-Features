@@ -14,7 +14,7 @@ public class ParsedFunction extends ParsedComponent
 {
 
     private String[] value;
-    private ArrayList tests = new ArrayList();
+    private ArrayList<ParsedTest> tests = new ArrayList<>();
     
     /** Creates a new instance of ParsedFunction */
     public ParsedFunction(String name, String[] value, int location)
@@ -23,7 +23,7 @@ public class ParsedFunction extends ParsedComponent
         this.value = value;
     }
     
-    public ParsedFunction(String name, String[] value, int location, String comment, ArrayList tests)
+    public ParsedFunction(String name, String[] value, int location, String comment, ArrayList<ParsedTest> tests)
     {
         super(name, location, comment);
         this.value = value;
@@ -45,7 +45,7 @@ public class ParsedFunction extends ParsedComponent
         return value;
     }
 
-    public ArrayList getTests()
+    public ArrayList<ParsedTest> getTests()
     {
         return this.tests;
     }

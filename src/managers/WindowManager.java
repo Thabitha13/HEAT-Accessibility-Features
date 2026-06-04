@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -15,12 +16,13 @@
 
 package managers;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import utils.HeatTheme;
+import view.windows.SplashWindow;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -59,6 +61,7 @@ public class WindowManager {
   private JSplitPane jSplitTree;
 
   /* windows */
+  private SplashWindow splashWindow;
   private EditorWindow displayWindow;
   private OptionsWindow optionsWindow;
   private AboutWindow aboutWindow;
@@ -107,7 +110,6 @@ public class WindowManager {
           case COMPILEDERROR: 
             log.info("[WindowManager]: setStatusCompiledError");
             toolbar.setCompileStatus(0);
-            accessibility.TTSManager.getInstance().speak("Compilation failed. Check the error in the console."); // TTS
             consoleWindow.setEnabled(false);
             displayWindow.setEnabled(true);
 	    setCompileEnabled(false);
@@ -117,9 +119,6 @@ public class WindowManager {
           case COMPILEDCORRECT:
             log.info("[WindowManager]: setStatusCompiledCorrect");
             toolbar.setCompileStatus(1);
-            if (savedStatus != COMPILEDCORRECT) { // Only speak if status actually changed
-              accessibility.TTSManager.getInstance().speak("Compilation successful. Ready to evaluate."); // TTS
-            }
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(true);
             setCompileEnabled(false);
@@ -129,7 +128,6 @@ public class WindowManager {
           case UNCOMPILED:
             log.info("[WindowManager]: setStatusUncompiled");
             toolbar.setCompileStatus(2);
-            accessibility.TTSManager.getInstance().speak("Program not compiled. Press compile to load."); // TTS
             consoleWindow.setEnabled(false);
             displayWindow.setEnabled(true);
             setCompileEnabled(true);
@@ -139,7 +137,6 @@ public class WindowManager {
           case EVALUATING:
             log.info("[WindowManager]: setStatusEvaluating");
             toolbar.setCompileStatus(3);
-            accessibility.TTSManager.getInstance().speak("Evaluating."); // TTS
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(false); 
             setCompileEnabled(false);
@@ -149,7 +146,6 @@ public class WindowManager {
           case NOPROGRAM:
             log.info("[WindowManager]: setStatusNoProgram");
             toolbar.setCompileStatus(1);
-            accessibility.TTSManager.getInstance().speak("No program loaded. Open a Haskell file to begin."); // TTS
             consoleWindow.setEnabled(true);
             displayWindow.setEnabled(false);
             setCompileEnabled(false);
@@ -190,10 +186,18 @@ public class WindowManager {
   
   public void setStatusNoProgram() {
       setStatus(NOPROGRAM);
-   }
-  
+      dismissSplash();
+  }
+
   public void setStatusCompiledCorrect() {
       setStatus(COMPILEDCORRECT);
+      dismissSplash();
+  }
+
+  public void notifyInterpreterReady() {
+      if (splashWindow != null) {
+          splashWindow.setStatus("GHCi ready — press N to create, O to open, Esc to skip");
+      }
   }
   
   public void setStatusEvaluating() {
@@ -422,13 +426,20 @@ public class WindowManager {
 
       
       setStatusNotCompiled();
+      applyTheme();
 
-// Restore high contrast mode if previously enabled by user
-      
-      boolean hc = Boolean.parseBoolean(
-        SettingsManager.getInstance().getSetting(utils.Settings.HIGH_CONTRAST_ENABLED));
-      if (hc) {
-        applyHighContrastTheme(true);
+      // Accessibility names for screen readers
+      jSplitMain.getAccessibleContext()
+          .setAccessibleName("Editor and console split panel");
+      jSplitTree.getAccessibleContext()
+          .setAccessibleName("Overview tree and main content split panel");
+      if (consoleWindow.getTextArea().getAccessibleContext() != null) {
+          consoleWindow.getTextArea().getAccessibleContext()
+              .setAccessibleName("GHCi interpreter console output");
+      }
+      if (displayWindow.getJTextPane().getAccessibleContext() != null) {
+          displayWindow.getJTextPane().getAccessibleContext()
+              .setAccessibleName("Haskell source code editor");
       }
 
     } catch (Exception e) {
@@ -552,6 +563,45 @@ public class WindowManager {
   }
 
   /**
+   * Applies the high-contrast theme to all main panels if enabled in settings.
+   * Call after createGUI() and after any theme toggle.
+   */
+  public void applyTheme() {
+    boolean hc = SettingsManager.getInstance().isHighContrastEnabled();
+
+    Color bg   = hc ? HeatTheme.HIGH_CONTRAST_BACKGROUND : null;
+    Color fg   = hc ? HeatTheme.HIGH_CONTRAST_FOREGROUND  : null;
+    Color edit = hc ? HeatTheme.HIGH_CONTRAST_EDITOR_BG   : null;
+
+    if (bg != null) {
+        mainScreenFrame.getContentPane().setBackground(bg);
+        consoleWindow.getTextArea().setBackground(bg);
+        consoleWindow.getTextArea().setForeground(fg);
+        consoleWindow.getTextArea().setCaretColor(fg);
+        displayWindow.getJTextPane().getPainter().setBackground(edit);
+        displayWindow.getJTextPane().getPainter().setForeground(fg);
+        displayWindow.getJTextPane().getPainter().setCaretColor(fg);
+    } else {
+        consoleWindow.getTextArea().setBackground(Color.WHITE);
+        consoleWindow.getTextArea().setForeground(Color.BLACK);
+        displayWindow.getJTextPane().getPainter().setBackground(Color.WHITE);
+        displayWindow.getJTextPane().getPainter().setForeground(Color.BLACK);
+    }
+    repaintAll();
+  }
+
+  public void setSplashWindow(SplashWindow sw) {
+    splashWindow = sw;
+  }
+
+  public void dismissSplash() {
+    if (splashWindow != null) {
+        splashWindow.dismiss();
+        splashWindow = null;
+    }
+  }
+
+  /**
    * Returns the main screen frame used in GUI
    *
    * @return the main screen frame from GUI
@@ -563,6 +613,10 @@ public class WindowManager {
   /* Methods to display extra windows */
   public void showOptionsWindow() {
     getOptionsWindow().show();
+  }
+
+  public void showFileExplorer() {
+    view.dialogs.KeyboardFileExplorerDialog.show(mainScreenFrame);
   }
 
   /**
@@ -689,7 +743,7 @@ public class WindowManager {
 	  // fm.saveTemporary();
 	  setStatusUncompiled();
 	  //  refresh tree window
-	  ParserManager.getInstance().refresh();
+	  ParserManager.refresh();
 	  getTreeWindow().refreshTree();
 	  //  and display updated treeWindow
 	  showAll();
@@ -706,62 +760,6 @@ public class WindowManager {
     } catch (Exception e) {
       log.warning("[WindowManager] Unable to set look and feel");
     }
-  }
-
-  public void applyHighContrastTheme(boolean enabled) {
-      if (enabled) {
-        Color bg      = Color.BLACK;
-        Color fg      = Color.WHITE;
-        Color inputBg = new Color(20, 20, 20);
-        Font  large   = new Font("Monospaced", Font.PLAIN, 16);
-
-        UIManager.put("Panel.background",              bg);
-        UIManager.put("Panel.foreground",              fg);
-        UIManager.put("Label.foreground",              fg);
-        UIManager.put("TextArea.background",           inputBg);
-        UIManager.put("TextArea.foreground",           fg);
-        UIManager.put("TextArea.caretForeground",      fg);
-        UIManager.put("TextPane.background",           inputBg);
-        UIManager.put("TextPane.foreground",           fg);
-        UIManager.put("TextPane.caretForeground",      fg);
-        UIManager.put("TextField.background",          inputBg);
-        UIManager.put("TextField.foreground",          fg);
-        UIManager.put("MenuBar.background",            bg);
-        UIManager.put("MenuBar.foreground",            fg);
-        UIManager.put("Menu.background",               bg);
-        UIManager.put("Menu.foreground",               fg);
-        UIManager.put("MenuItem.background",           bg);
-        UIManager.put("MenuItem.foreground",           fg);
-        UIManager.put("CheckBoxMenuItem.background",   bg);
-        UIManager.put("CheckBoxMenuItem.foreground",   fg);
-        UIManager.put("PopupMenu.background",          bg);
-        UIManager.put("PopupMenu.foreground",          fg);
-        UIManager.put("ScrollPane.background",         bg);
-        UIManager.put("Viewport.background",           bg);
-        UIManager.put("SplitPane.background",          bg);
-        UIManager.put("ToolBar.background",            bg);
-        UIManager.put("Button.background",             new Color(40, 40, 40));
-        UIManager.put("Button.foreground",             fg);
-        UIManager.put("ComboBox.background",           inputBg);
-        UIManager.put("ComboBox.foreground",           fg);
-        UIManager.put("Tree.background",               bg);
-        UIManager.put("Tree.foreground",               fg);
-        UIManager.put("Tree.textBackground",           bg);
-        UIManager.put("Tree.textForeground",           fg);
-        UIManager.put("defaultFont",                   large);
-      } else {
-          try {
-              UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-          } catch (Exception e) {
-              log.warning("[WindowManager] Could not restore default look and feel");
-          }
-      }
-
-      SettingsManager.getInstance().setSetting(
-          utils.Settings.HIGH_CONTRAST_ENABLED, String.valueOf(enabled));
-
-      SwingUtilities.updateComponentTreeUI(mainScreenFrame);
-      mainScreenFrame.repaint();
   }
 
 } // end WindowManager

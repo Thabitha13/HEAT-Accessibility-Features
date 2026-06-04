@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -37,7 +38,7 @@ public class InterpreterOutput extends Thread {
   /* Attributes */
   private BufferedWriter bw;
   private String stringToSend;
-  private Vector strings;
+  private Vector<String> strings;
   /* Object for syncing */
   private Object waitOnString;
   private OutputStream os;
@@ -50,7 +51,7 @@ public class InterpreterOutput extends Thread {
   public InterpreterOutput(OutputStream os) {
     this.os = os;
     stringToSend = new String();
-    strings = new Vector();
+    strings = new Vector<>();
     continueToRun = true;
     waitOnString = new Object();
   }
@@ -79,7 +80,7 @@ public class InterpreterOutput extends Thread {
           waitOnString.wait();
         }
         while (!strings.isEmpty()) {
-          str = (String) strings.remove(0);
+          str = strings.remove(0);
           os.write(str.getBytes());
           os.flush();
         }

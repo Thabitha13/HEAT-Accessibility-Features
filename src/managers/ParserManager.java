@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2006 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K

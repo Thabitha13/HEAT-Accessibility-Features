@@ -88,7 +88,7 @@ public class SyntaxStyle {
     lastFont = font;
     lastStyledFont = new Font(font.getFamily(), (bold ? Font.BOLD : 0)
         | (italic ? Font.ITALIC : 0), font.getSize());
-    fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(lastStyledFont);
+    fontMetrics = new javax.swing.JLabel().getFontMetrics(lastStyledFont);
     return fontMetrics;
   }
 

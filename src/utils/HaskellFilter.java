@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -20,14 +21,20 @@ import java.io.*;
 import javax.swing.*;
 
 /**
- * File filter for Haskell files (only .hs)
+ * File filter for Haskell source files.
+ * Accepts standard Haskell (.hs) and literate Haskell (.lhs) files,
+ * both of which HEAT can edit and syntax-highlight.
  */
 public class HaskellFilter extends javax.swing.filechooser.FileFilter {
   public boolean accept(File f) {
-    return f.getName().toLowerCase().endsWith(".hs") || f.isDirectory();
+    if (f.isDirectory()) {
+      return true;
+    }
+    String name = f.getName().toLowerCase();
+    return name.endsWith(".hs") || name.endsWith(".lhs");
   }
 
   public String getDescription() {
-    return "Haskell files (*.hs)";
+    return "Haskell files (*.hs, *.lhs)";
   }
 }

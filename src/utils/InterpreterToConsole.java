@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -66,7 +67,6 @@ public class InterpreterToConsole extends Thread {
    		          javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
                             public void run() {
 				  cw.charFromInterpreter(character);
-          accessibility.TTSManager.getInstance().bufferChar(character); // TTS
                             }
 			  });
 			  // yield(); // give GUI chance to print the character
