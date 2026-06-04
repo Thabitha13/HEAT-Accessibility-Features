@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -35,6 +36,7 @@ import java.awt.event.ActionListener;
 
 import java.io.File;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -56,8 +58,9 @@ public class OptionsWindow {
   private JTextField jTextFieldLibraryPath;
   private JTextField jTextFieldTestFunction;
   private JTextField jTextFieldTestPositive;
-  private JComboBox jcbOutputFontSize;
-  private JComboBox jcbCodeFontSize;
+  private JComboBox<String> jcbOutputFontSize;
+  private JComboBox<String> jcbCodeFontSize;
+  private JCheckBox highContrastCheckBox;
   private JDialog dialog;
 
   private SettingsManager sm = SettingsManager.getInstance();
@@ -133,10 +136,17 @@ public class OptionsWindow {
     testPositive.add(jTextFieldTestPositive);
     panelTest.add(testPositive);
     
+    // panel for accessibility settings
+    JPanel panelAccessibility = new JPanel(new GridLayout(0, 1));
+    highContrastCheckBox = new JCheckBox("High contrast mode (for low vision)");
+    highContrastCheckBox.getAccessibleContext()
+        .setAccessibleName("High contrast mode toggle for low vision accessibility");
+    panelAccessibility.add(highContrastCheckBox);
+
     // panel for setting font sizes
     JPanel panelFontSizes = new JPanel(new GridLayout(0,1));
-    jcbOutputFontSize = new JComboBox();
-    jcbCodeFontSize = new JComboBox();
+    jcbOutputFontSize = new JComboBox<>();
+    jcbCodeFontSize = new JComboBox<>();
  /* Populate the font size combo boxes */
     for (int i = 10; i < 25; i++) {
       jcbOutputFontSize.addItem(String.valueOf(i));
@@ -156,6 +166,7 @@ public class OptionsWindow {
     tabOptions.addTab("Haskell Interpreter", panelInterpreter);
     tabOptions.addTab("Property Tests", panelTest);
     tabOptions.addTab("Font Sizes", panelFontSizes);
+    tabOptions.addTab("Accessibility", panelAccessibility);
     
     // buttons for applying options and cancellation
     JButton buttonApply = new JButton("Apply");
@@ -213,6 +224,11 @@ public class OptionsWindow {
     jTextFieldTestPositive.setText(sm.getSetting(Settings.TEST_POSITIVE));
     jcbOutputFontSize.setSelectedItem(sm.getSetting(Settings.OUTPUT_FONT_SIZE));
     jcbCodeFontSize.setSelectedItem(sm.getSetting(Settings.CODE_FONT_SIZE));
+    highContrastCheckBox.setSelected(sm.isHighContrastEnabled());
+  }
+
+  public boolean isHighContrastSelected() {
+    return highContrastCheckBox.isSelected();
   }
 
  

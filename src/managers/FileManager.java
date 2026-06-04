@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -98,7 +99,7 @@ public class FileManager {
    */
   public String readFile(File fileToRead) {
    
-    StringBuffer content = new StringBuffer();
+    StringBuilder content = new StringBuilder();
     BufferedReader input = null;
 
     try {
@@ -187,16 +188,19 @@ public class FileManager {
   }
   
   /**
-   * Add suffix .hs if necessary
+   * Ensure the file has a Haskell extension, appending .hs only when needed.
+   * Files that are already Haskell source (.hs) or literate Haskell (.lhs),
+   * regardless of case, are returned unchanged so they are not double-suffixed
+   * (e.g. "report.lhs" must not become "report.lhs.hs").
    * @param file
-   * @return 
+   * @return
    */
   public File ensureHaskellFileType(File file) {
-      String path = file.getAbsolutePath();
-      if (path.endsWith(".hs")) {
+      String lower = file.getAbsolutePath().toLowerCase();
+      if (lower.endsWith(".hs") || lower.endsWith(".lhs")) {
           return file;
       } else {
-          return new File(path+".hs");
+          return new File(file.getAbsolutePath() + ".hs");
       }
   }
 
@@ -206,7 +210,7 @@ public class FileManager {
    * @return filePath the path to the file
    */
   public String getFilePath() {
-    return currentFile.getAbsolutePath();
+    return currentFile == null ? "" : currentFile.getAbsolutePath();
   }
   
   /**

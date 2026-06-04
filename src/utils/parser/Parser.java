@@ -71,7 +71,7 @@ public class Parser
     public boolean hasUncheckedTests() {
     	boolean hasUnchecked = false;
     	for (ParsedTest test : tests) {
-    		hasUnchecked = hasUnchecked || (test.getState() == "testUnknown");
+    		hasUnchecked = hasUnchecked || ("testUnknown".equals(test.getState()));
     	}
     	return hasUnchecked;
     }
@@ -104,7 +104,7 @@ public class Parser
         
         for (int i=0; i<this.inText.size(); i++)
         {
-            currentString = (String) this.inText.get(i);
+            currentString = this.inText.get(i);
             matcher = pattern.matcher(currentString);
             
             if (matcher.find()) // found somethin with comments. now lets break it apart
@@ -128,7 +128,7 @@ public class Parser
 				// if multiple elements defined on the same line
 				for (int n=0; n<names.length; n++)
 				{
-                    ArrayList matches = findMatches(names[n].trim());
+                    ArrayList<ParsedTest> matches = findMatches(names[n].trim());
                                 if (!names[n].trim().startsWith("prop_")) {
 			            this.elements.add(new ParsedFunction(names[n].trim(), values, i, comment, matches));
                                 }
@@ -201,7 +201,7 @@ public class Parser
 
         for (int i=0; i<this.inText.size(); i++)
         {
-            currentString = (String) this.inText.get(i);
+            currentString = this.inText.get(i);
             matcher = pattern.matcher(currentString);
             
             if (matcher.find())
@@ -218,7 +218,7 @@ public class Parser
 
         for (int i=0; i<this.inText.size(); i++)
         {
-            currentString = (String) this.inText.get(i);
+            currentString = this.inText.get(i);
             matcher = pattern.matcher(currentString);
             
             if (matcher.find())
@@ -238,7 +238,7 @@ public class Parser
         Matcher matcher;
         for (int i=0; i<this.inText.size(); i++)
         {
-            currentString = (String) this.inText.get(i);
+            currentString = this.inText.get(i);
             matcher = pattern.matcher(currentString);
             if (matcher.find())
             {

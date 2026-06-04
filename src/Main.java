@@ -1,4 +1,5 @@
-/** 
+/* 
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -13,17 +14,15 @@
 
 //import com.incors.plaf.alloy.AlloyLookAndFeel;
 
-import managers.FileManager;
+import java.io.File;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import managers.InterpreterManager;
 import managers.SettingsManager;
-import managers.WindowManager;
 import managers.UndoManager;
-import java.util.logging.Logger;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.Level;
-import java.io.File;
+import managers.WindowManager;
+import view.windows.SplashWindow;
 
 /**
  * Main HEAT class
@@ -47,24 +46,25 @@ public static void main(String[] args) {
     
     System.setProperty("com.apple.mrj.application.apple.menu.about.name", ""); // set name of main menu on Mac
     System.setProperty("apple.laf.useScreenMenuBar", "true");  // on Mac separate menu from window
-	  
+
+    // Show splash before building main window
+    SplashWindow splash = new SplashWindow();
+    splash.setVisible(true);
+
     SettingsManager sm = SettingsManager.getInstance();
     WindowManager wm = WindowManager.getInstance();
 
     sm.loadSettings();
     WindowManager.setLookAndFeel();
     wm.createGUI();
+    wm.setSplashWindow(splash);
 
-    if (sm.isNewSettingsFile())
+    if (sm.isNewSettingsFile()) {
+      wm.dismissSplash();
       wm.showWizardWindow();
-      // will also start interpreter process
-    else {
-      // FileManager fm = FileManager.getInstance();
-      // fm.saveTemporary();
-
+    } else {
       InterpreterManager im = InterpreterManager.getInstance();
       im.startProcess(false);
-      try { Thread.sleep(2000); } catch (Exception e) {} // Wait for startup
     }
     
     if (args.length > 0) {
@@ -88,4 +88,3 @@ public static void main(String[] args) {
     }).start();
    }
 }
-  

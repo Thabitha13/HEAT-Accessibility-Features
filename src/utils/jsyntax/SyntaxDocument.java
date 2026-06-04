@@ -20,6 +20,7 @@ import javax.swing.undo.UndoableEdit;
  * @version $Id: SyntaxDocument.java,v 1.14 1999/12/13 03:40:30 sp Exp $
  */
 public class SyntaxDocument extends PlainDocument {
+  private static final long serialVersionUID = 1L;
 
   private static boolean modified = false;
 
@@ -122,7 +123,7 @@ public class SyntaxDocument extends PlainDocument {
   }
 
   // protected members
-  protected TokenMarker tokenMarker;
+  protected transient TokenMarker tokenMarker;
 
   /**
    * We overwrite this method to update the token marker state immediately so

@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -104,7 +105,7 @@ public class InterpreterManager {
 	  try {
 		  os.write(txt.getBytes());
 		  os.flush();
-		  log.warning("send: " + txt);
+		  log.info("send: " + txt);
 	  } catch(IOException e) {
     	  e.printStackTrace();
       }

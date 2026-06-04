@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -101,6 +102,8 @@ public class TreeWindow
     	tree = new JTree(top);
         tree.setRowHeight(18);
         tree.setRootVisible(false);
+        tree.getAccessibleContext().setAccessibleName(
+            "Code overview: Properties, Functions, Algebraic types, Type synonyms");
         ToolTipManager.sharedInstance().registerComponent(tree);
         tree.setCellRenderer(new MyRenderer());
 
@@ -186,18 +189,18 @@ public class TreeWindow
         this.tree.updateUI();
     }
     
-    private void updateProps(ArrayList tests){
+    private void updateProps(ArrayList<ParsedTest> tests){
       TreeModel tree = this.tree.getModel();
       DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getRoot();
       DefaultMutableTreeNode testsNode = (DefaultMutableTreeNode) root.getChildAt(treeChildProperties);
       testsNode.removeAllChildren();
       for (int i=0; i<tests.size(); i++ ){
-        ParsedTest test=(ParsedTest)tests.get(i);
+        ParsedTest test=tests.get(i);
         testsNode.add(new DefaultMutableTreeNode(test));
       }
     }
     
-    private void updateFunctions(ArrayList elements)
+    private void updateFunctions(ArrayList<ParsedFunction> elements)
     {
         TreeModel tree = this.tree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getRoot();
@@ -206,13 +209,13 @@ public class TreeWindow
 
         for (int i=0 ; i<elements.size(); i++ )
         {
-            ParsedFunction element = (ParsedFunction) elements.get(i);
+            ParsedFunction element = elements.get(i);
             elementsNode.add(new DefaultMutableTreeNode (element));
         }
     }
 
 
-    private void updateDatatypes(ArrayList datatypes)
+    private void updateDatatypes(ArrayList<ParsedDatatype> datatypes)
     {
         TreeModel tree = this.tree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getRoot();
@@ -222,12 +225,12 @@ public class TreeWindow
 
         for (int i=0 ; i<datatypes.size(); i++ )
         {
-            ParsedDatatype datatype = (ParsedDatatype) datatypes.get(i);
+            ParsedDatatype datatype = datatypes.get(i);
             datatypesNode.add(new DefaultMutableTreeNode (datatype));
         }
     }
 
-    private void updateTypes(ArrayList types)
+    private void updateTypes(ArrayList<ParsedType> types)
     {
         TreeModel tree = this.tree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getRoot();
@@ -237,7 +240,7 @@ public class TreeWindow
 
         for (int i=0 ; i<types.size(); i++ )
         {
-            ParsedType type = (ParsedType) types.get(i);
+            ParsedType type = types.get(i);
             typesNode.add(new DefaultMutableTreeNode (type));
         }
     }
@@ -331,8 +334,8 @@ public class TreeWindow
         if (node.isLeaf() && path.getPathComponent(1)=="Properties")
         {
             ParsedFunction element = (ParsedFunction)node.getUserObject();
-            ArrayList tests = element.getTests();
-            ParsedTest test = (ParsedTest)tests.get(0);
+            ArrayList<ParsedTest> tests = element.getTests();
+            ParsedTest test = tests.get(0);
             WindowManager.getInstance().getConsoleWindow().runTest(test);
         }
     }
@@ -358,7 +361,7 @@ public class TreeWindow
     {
         MouseListener ml = new MouseAdapter()
         {
-            private ArrayList tests;
+            private ArrayList<ParsedTest> tests;
             public void mousePressed(MouseEvent e)
             {
                 int selRow = tree.getRowForLocation(e.getX(), e.getY());
@@ -411,12 +414,13 @@ public class TreeWindow
 
     class MyRenderer extends DefaultTreeCellRenderer
     {
+      private static final long serialVersionUID = 1L;
         public MyRenderer() {
         }
 
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
         {
-          ArrayList tests;
+          ArrayList<ParsedTest> tests;
           super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
           Object object = node.getUserObject();
@@ -433,9 +437,9 @@ public class TreeWindow
           }
           else{
             if (node.getParent().toString().matches("Properties")){
-              tests=ParserManager.getInstance().getParser().getTests();
+              tests=ParserManager.getParser().getTests();
               ParsedTest test=(ParsedTest)object;
-              setIcon(Resources.getIcon(((ParsedTest)tests
+              setIcon(Resources.getIcon((tests
               	.get(tests.indexOf(test))).getState()));
             }
             else
@@ -454,7 +458,7 @@ public class TreeWindow
             String display = "";
             String parameters[] = element.getValue();
             for (int i = 0; i < parameters.length-1; i++){
-              display = display.concat((String)parameters[i] + " -> ");
+              display = display.concat(parameters[i] + " -> ");
             }
             display = display.concat(parameters[parameters.length-1]);
             setToolTipText(element.getName() + " :: " + display);

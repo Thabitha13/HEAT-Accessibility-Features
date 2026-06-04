@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -54,7 +55,6 @@ public class Settings {
   
   public static final String TEST_POSITIVE = "TEST_POSITIVE";
 
-  /** Whether TTS reading is enabled */
-  public static final String TTS_ENABLED = "TTS_ENABLED";
-  
+  public static final String HIGH_CONTRAST_MODE = "highContrastMode";
+
 }

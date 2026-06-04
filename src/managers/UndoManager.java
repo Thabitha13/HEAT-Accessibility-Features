@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -23,6 +24,7 @@ import managers.ActionManager;
  * @author Dean Ashton
  */
 public class UndoManager extends javax.swing.undo.UndoManager {
+  private static final long serialVersionUID = 1L;
   private static UndoManager instance = null;
 
   protected UndoManager() {
