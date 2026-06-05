@@ -129,6 +129,8 @@ public class DefaultInputHandler extends InputHandler {
     // Thabitha: toggle colour blind mode from editor (Cmd+Shift+C / Ctrl+Shift+C)
     addKeyBinding ("CS+C", ActionManager.getInstance().getToggleColourBlindAction());
     addKeyBinding ("MS+C", ActionManager.getInstance().getToggleColourBlindAction());
+    addKeyBinding ("M+=", ActionManager.getInstance().getIncreaseFontSizeAction());
+    addKeyBinding ("M+-", ActionManager.getInstance().getDecreaseFontSizeAction());
   }
 
   /**

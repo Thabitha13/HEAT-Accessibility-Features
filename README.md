@@ -1,95 +1,120 @@
-# QuickDraw Image Classification with a 2D CNN
+# HEAT — Haskell Educational Advancement Tool
+## Accessibility Extensions — Group 5, COMP7024
 
-COMP7017 Deep Learning — Project A
+This repository contains HEAT v5 extended with accessibility features for students with visual disabilities.
 
-A Convolutional Neural Network that classifies hand-drawn doodles from Google's QuickDraw dataset into 10 categories at 94% test accuracy.
+The technical report is at `documentation/Report.pdf`.
 
-## Categories
+---
 
-Apple, Bicycle, Cat, Dog, Fish, House, Star, Tree, Umbrella, Sun
+## Features
 
-## Model Architecture
+- **Text-to-Speech (TTS)** — speaks every status change, compilation result, and GHCi error in plain English
+- **Error Simplification** — maps raw GHCi errors to plain English (10 error patterns)
+- **Keyboard Navigation** — F5 compile, F6 interrupt, F7 test, F10 toolbar focus, F1 shortcut guide, Cmd+A select all
+- **Colour Blind Mode** — Deuteranopia-safe palette (Cmd+Shift+C to toggle)
+- **Font Size Control** — A+ and A- buttons with slider, always visible above the editor
+- **Splash Screen** — keyboard-navigable startup screen (Cmd+N new file, Cmd+O open file, Escape dismiss)
+- **Keyboard File Dialogs** — search-based file open, new file, and file explorer dialogs
 
-Two convolutional blocks following the LeNet-5 pattern:
+---
 
-| Layer | Configuration | Output Shape |
-|-------|--------------|-------------|
-| Normalization | Adapted to training data | 28×28×1 |
-| Conv2D + ReLU | 32 filters, 3×3, stride 1 | 26×26×32 |
-| MaxPooling2D | 2×2, stride 2 | 13×13×32 |
-| Conv2D + ReLU | 64 filters, 3×3, stride 1 | 11×11×64 |
-| MaxPooling2D | 2×2, stride 2 | 5×5×64 |
-| Dropout | 0.3 | 5×5×64 |
-| Flatten | — | 1600 |
-| Dense + ReLU | 128 neurons | 128 |
-| Dropout | 0.5 | 128 |
-| Dense + ReLU | 64 neurons | 64 |
-| Dropout | 0.5 | 64 |
-| Dense + Softmax | 10 classes | 10 |
+## Prerequisites
 
-## Results
+- Java JDK 11 or later
+- GHCi installed via GHCup: https://www.haskell.org/ghcup/
 
-- **Test accuracy**: 94.12%
-- **Weighted F1-score**: 0.94
-- **Best classes**: Bicycle (98.0%), House (97.6%), Apple (96.7%)
-- **Hardest classes**: Cat (85.3%), Dog (86.0%) — mutual misclassification due to visual similarity at 28×28 resolution
-
-## Experiments
-
-| | Experiment 1 | Experiment 2 (Final) | Experiment 3 |
-|---|---|---|---|
-| Samples/class | 5,000 | 10,000 | 10,000 |
-| Conv blocks | 2 | 2 | 3 |
-| Epochs | 100 | 17 (early stop) | 15 (early stop) |
-| Overfitting | Yes | No | No |
-| Test accuracy | ~94% | 94% | 94% |
-
-Experiment 3 proved that the accuracy ceiling is a data limitation at 28×28 resolution, not a model capacity issue.
-
-## Setup
-
-### Requirements
-
-- Python 3.8+
-- TensorFlow 2.x
-- Keras
-- NumPy
-- Matplotlib
-- scikit-learn
-
-### Install dependencies
-
-```bash
-pip install tensorflow numpy matplotlib scikit-learn
+On macOS with GHCup, GHCi is typically at:
+```
+/Users/[username]/.ghcup/bin/ghci
 ```
 
-### Run
+---
 
-1. Open `QuickDraw_CNN_Project.ipynb` in Jupyter Notebook or Google Colab
-2. Run all cells — the notebook downloads the QuickDraw data automatically
-3. Training takes 10-30 minutes on GPU
+## Clone and Run
+
+```bash
+git clone https://git.cs.kent.ac.uk/comp7024/G5.git
+cd G5
+mkdir -p bin
+find src -name "*.java" | xargs javac -d bin
+cp -r src/icons bin/
+cp -r src/html bin/
+java -cp bin Main
+```
+
+On first launch HEAT will ask for the path to your GHCi interpreter. Enter the full path, click Continue, and HEAT will start.
+
+---
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| Cmd+O | Open a Haskell file |
+| F5 | Compile and load |
+| F6 | Interrupt |
+| F7 | Run tests |
+| F10 | Focus toolbar |
+| Tab | Move between toolbar buttons |
+| F1 | Read all shortcuts aloud |
+| Cmd+A | Select all |
+| Cmd+Shift+C | Toggle colour blind mode |
+| Cmd+= | Increase font size |
+| Cmd+- | Decrease font size |
+
+---
+
+## Running Unit Tests
+
+```bash
+cd test/unit
+for f in ErrorSimplifierTest ColorThemeManagerTest FontSizeManagerTest; do
+  javac -cp ../../src ${f}.java && java -cp .:../../src $f
+  echo ""
+done
+
+javac KeyboardDialogsTest.java && java KeyboardDialogsTest
+```
+
+All 51 tests should pass.
+
+---
+
+## TTS Settings
+
+TTS is enabled by default. To disable it, open `~/heat.settings` and set:
+```
+TTS_ENABLED=false
+```
+
+---
 
 ## Project Structure
 
 ```
-├── QuickDraw_CNN_Project.ipynb    # Main notebook with all code and outputs
-├── COMP7017_Report.pdf            # Project report
-├── README.md                      # This file
-└── quickdraw_data/                # Downloaded automatically on first run
-    ├── apple.npy
-    ├── bicycle.npy
-    ├── cat.npy
-    ├── dog.npy
-    ├── fish.npy
-    ├── house.npy
-    ├── star.npy
-    ├── tree.npy
-    ├── umbrella.npy
-    └── sun.npy
+src/                        Java source files
+  accessibility/            TTS, error simplifier, colour theme, font size, keyboard guide
+  managers/                 Window, action, settings, interpreter managers
+  view/dialogs/             Keyboard file dialogs
+  view/panels/              Accessibility font size panel
+  view/toolbars/            Menu bar and toolbar
+  view/windows/             Editor, console, splash screen, options
+  utils/                    Settings, resources, parser
+bin/                        Compiled classes (generated on build)
+test/
+  unit/                     51 automated unit tests
+  functional/               16 manual functional test scenarios
+documentation/              Technical report (Report.pdf), UML diagrams (PNG and PlantUML source)
 ```
 
-## Built With
+---
 
-- [Keras](https://keras.io/) / [TensorFlow](https://www.tensorflow.org/)
-- [Google QuickDraw Dataset](https://quickdraw.withgoogle.com/data)
-- Techniques from COMP7017 Lectures 8 and 9 (CNNs, LeNet-5)
+## Team
+
+| Name | Student ID | Feature |
+|---|---|---|
+| Yarushah | ys321 | TTS, keyboard navigation, error simplification, final merge |
+| Goutham | gs100 | Splash screen, keyboard file dialogs, UML diagrams |
+| Thabitha | ta106 | Colour blind mode, font size control, icon enlargement |
+| Rinku Kumari | rk105 | Assigned settings integration (not delivered) |

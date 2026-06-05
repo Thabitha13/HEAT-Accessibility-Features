@@ -11,6 +11,20 @@ import java.util.logging.Logger;
  */
 public class FontSizeManager {
 
+    private static java.util.List<Runnable> listeners = new java.util.ArrayList<>();
+
+    public static void addFontSizeListener(Runnable listener) {
+        listeners.add(listener);
+    }
+
+    public static void removeFontSizeListener(Runnable listener) {
+        listeners.remove(listener);
+    }
+
+    private static void notifyListeners() {
+        for (Runnable r : listeners) r.run();
+    }
+
     private static Logger log = Logger.getLogger("heat");
     private static final int MIN_FONT_SIZE = 8;
     private static final int MAX_FONT_SIZE = 36;
@@ -76,6 +90,7 @@ public class FontSizeManager {
         if (newConsoleSize <= MAX_FONT_SIZE) {
             setConsoleFontSize(newConsoleSize);
         }
+        notifyListeners();
     }
 
     /**
@@ -91,6 +106,7 @@ public class FontSizeManager {
         if (newConsoleSize >= MIN_FONT_SIZE) {
             setConsoleFontSize(newConsoleSize);
         }
+        notifyListeners();
     }
 
     /**

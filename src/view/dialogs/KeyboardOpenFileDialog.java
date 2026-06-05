@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * Spotlight-style keyboard-driven dialog for opening an existing Haskell file.
  * TTS: speaks instructions on open, and reads selected file path on Cmd+F5.
+ * Font size is applied from FontSizeManager when the dialog opens.
  */
 public class KeyboardOpenFileDialog extends JDialog {
 
@@ -35,11 +36,12 @@ public class KeyboardOpenFileDialog extends JDialog {
             "Open Haskell file dialog. Type a file name and press Enter to search. " +
             "Use arrow keys to select from results. Press Enter to open the selected file.");
 
-        // TTS: speak instructions when dialog opens
         addWindowListener(new WindowAdapter() {
             public void windowOpened(WindowEvent e) {
                 accessibility.TTSManager.getInstance().speak(
                     "Search for a Haskell file. Type the file name and press Enter.");
+                applyFontSize();
+                pack();
             }
         });
     }
@@ -54,8 +56,7 @@ public class KeyboardOpenFileDialog extends JDialog {
         c.insets = new Insets(4, 4, 4, 4);
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        // Row 0: label | filename field | Search button
-        c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0; c.gridy = 0; c.weightx = 0;
         inputPanel.add(new JLabel("File name:"), c);
         filenameField = new JTextField(18);
         filenameField.getAccessibleContext().setAccessibleName(
@@ -63,11 +64,11 @@ public class KeyboardOpenFileDialog extends JDialog {
         c.gridx = 1; c.weightx = 1;
         inputPanel.add(filenameField, c);
         JButton searchBtn = new JButton("Search");
-        searchBtn.getAccessibleContext().setAccessibleName("Search. Press to find files matching the name you typed.");
+        searchBtn.getAccessibleContext().setAccessibleName(
+            "Search. Press to find files matching the name you typed.");
         c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE;
         inputPanel.add(searchBtn, c);
 
-        // Row 1: label | directory field (spans cols 1-2)
         c.gridx = 0; c.gridy = 1; c.weightx = 0; c.fill = GridBagConstraints.HORIZONTAL; c.gridwidth = 1;
         inputPanel.add(new JLabel("Directory (optional):"), c);
         directoryField = new JTextField("", 22);
@@ -76,9 +77,9 @@ public class KeyboardOpenFileDialog extends JDialog {
         c.gridx = 1; c.weightx = 1; c.gridwidth = 2;
         inputPanel.add(directoryField, c);
 
-        // Row 2: hint
-        c.gridx = 1; c.gridy = 2; c.gridwidth = 2; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.WEST;
-        JLabel hint = new JLabel("Leave directory blank to search ~/   ·   Press Enter or Search");
+        c.gridx = 1; c.gridy = 2; c.gridwidth = 2; c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.WEST;
+        JLabel hint = new JLabel("Leave directory blank to search ~/   \u00b7   Press Enter or Search");
         hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 10f));
         hint.setForeground(Color.GRAY);
         inputPanel.add(hint, c);
@@ -132,7 +133,6 @@ public class KeyboardOpenFileDialog extends JDialog {
             public void actionPerformed(ActionEvent e) { openSelected(); }
         });
 
-        // Tab from directory field focuses list when results are present
         directoryField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_TAB && !listModel.isEmpty()) {
@@ -145,14 +145,12 @@ public class KeyboardOpenFileDialog extends JDialog {
 
         int menu = java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
-        // Cmd/Ctrl+[ from results list → focus back to filename field
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, menu), "backToSearch");
         getRootPane().getActionMap().put("backToSearch", new AbstractAction() {
             public void actionPerformed(ActionEvent e) { filenameField.requestFocus(); }
         });
 
-        // Cmd+F5 → read the full path of the currently selected file aloud
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, menu), "speakPath");
         getRootPane().getActionMap().put("speakPath", new AbstractAction() {
@@ -182,7 +180,8 @@ public class KeyboardOpenFileDialog extends JDialog {
         String query = filenameField.getText().trim();
         if (query.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Please type a file name to search for.", "Missing name", JOptionPane.WARNING_MESSAGE);
+                "Please type a file name to search for.", "Missing name",
+                JOptionPane.WARNING_MESSAGE);
             filenameField.requestFocus();
             return;
         }
@@ -197,7 +196,8 @@ public class KeyboardOpenFileDialog extends JDialog {
         File root = new File(dirStr);
         if (!root.exists() || !root.isDirectory()) {
             JOptionPane.showMessageDialog(this,
-                "Directory not found: " + dirStr, "Directory error", JOptionPane.WARNING_MESSAGE);
+                "Directory not found: " + dirStr, "Directory error",
+                JOptionPane.WARNING_MESSAGE);
             directoryField.requestFocus();
             return;
         }
@@ -220,13 +220,11 @@ public class KeyboardOpenFileDialog extends JDialog {
             boolean truncated = found.size() >= MAX_RESULTS;
             int count = found.size();
             statusLabel.setText(count + (truncated ? "+" : "") + " result(s)");
-
-            // TTS: announce how many results and how to hear the paths
             String msg = count == 1
                 ? "1 file found. Press Command F5 to hear the file path. Press Enter to open."
-                : count + " files found. Use arrow keys to navigate. Press Command F5 to hear the path of the selected file. Press Enter to open.";
+                : count + " files found. Use arrow keys to navigate. "
+                  + "Press Command F5 to hear the path of the selected file. Press Enter to open.";
             accessibility.TTSManager.getInstance().speak(msg);
-
             resultList.requestFocus();
             resultList.setSelectedIndex(0);
         }
@@ -245,9 +243,8 @@ public class KeyboardOpenFileDialog extends JDialog {
             if (results.size() >= MAX_RESULTS) return;
             if (f.isFile()) {
                 String n = f.getName().toLowerCase();
-                if ((n.endsWith(".hs") || n.endsWith(".lhs")) && n.contains(query)) {
+                if ((n.endsWith(".hs") || n.endsWith(".lhs")) && n.contains(query))
                     results.add(f);
-                }
             } else if (f.isDirectory() && !f.isHidden()) {
                 searchRecursive(f, query, results, depth + 1);
             }
@@ -286,9 +283,26 @@ public class KeyboardOpenFileDialog extends JDialog {
         return dlg.getResult();
     }
 
+    /** Applies the current FontSizeManager font size to all components in the dialog. */
+    private void applyFontSize() {
+        float size = accessibility.FontSizeManager.getEditorFontSize();
+        Font font = getFont().deriveFont(size);
+        setFontRecursively(getContentPane(), font);
+    }
+
+    private void setFontRecursively(Component comp, Font font) {
+        comp.setFont(font);
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                setFontRecursively(child, font);
+            }
+        }
+    }
+
     private static class FileCellRenderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(
-                JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof File) {
                 File f = (File) value;
