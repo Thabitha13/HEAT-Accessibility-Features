@@ -23,6 +23,7 @@ import java.awt.*;
  * @version $Id: TextAreaPainter.java,v 1.24 1999/12/13 03:40:30 sp Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander {
+  private static final long serialVersionUID = 1L;
   /**
    * Creates a new repaint manager. This should be not be called directly.
    */
@@ -71,6 +72,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
    * Returns if this component can be traversed by pressing the Tab key. This
    * returns false.
    */
+  @SuppressWarnings("deprecation")
   public final boolean isManagingFocus() {
     return false;
   }
@@ -367,7 +369,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
    */
   public void setFont(Font font) {
     super.setFont(font);
-    fm = Toolkit.getDefaultToolkit().getFontMetrics(font);
+    fm = getFontMetrics(font);
     textArea.recalculateVisibleLines();
   }
 
@@ -485,14 +487,14 @@ public class TextAreaPainter extends JComponent implements TabExpander {
   // package-private members
   int currentLineIndex;
 
-  Token currentLineTokens;
+  transient Token currentLineTokens;
 
-  Segment currentLine;
+  transient Segment currentLine;
 
   // protected members
-  protected JEditTextArea textArea;
+  protected transient JEditTextArea textArea;
 
-  protected SyntaxStyle[] styles;
+  protected transient SyntaxStyle[] styles;
 
   protected Color caretColor;
 
@@ -527,7 +529,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 
   protected FontMetrics fm;
 
-  protected Highlight highlights;
+  protected transient Highlight highlights;
 
   protected int markLine = -2;
 
@@ -566,7 +568,7 @@ public class TextAreaPainter extends JComponent implements TabExpander {
     gfx.setColor(defaultColor);
 
     y += fm.getHeight();
-    x = Utilities.drawTabbedText(currentLine, x, y, gfx, this, 0);
+    x = (int) Utilities.drawTabbedText(currentLine, (float)x, (float)y, (java.awt.Graphics2D)gfx, this, 0);
 
     if (eolMarkers) {
       gfx.setColor(eolMarkerColor);
@@ -607,10 +609,10 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 
       if (markLine == line + 1) {
         gfx.setColor(Color.red);
-        gfx.drawString(new Integer(line + 1).toString()+"*", 0/*x-leftBorder*/, y);
+        gfx.drawString(Integer.toString(line + 1)+"*", 0/*x-leftBorder*/, y);
       } else {
         gfx.setColor(Color.black);
-        gfx.drawString(new Integer(line + 1).toString(), 0/*x-leftBorder*/, y);
+        gfx.drawString(Integer.toString(line + 1), 0/*x-leftBorder*/, y);
       }
     }
   }

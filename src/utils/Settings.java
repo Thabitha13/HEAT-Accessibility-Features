@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -53,8 +54,10 @@ public class Settings {
   public static final String TEST_FUNCTION = "TEST_FUNCTION";
   
   public static final String TEST_POSITIVE = "TEST_POSITIVE";
-  /**
+/**
    * Whether deuteranopia colour mode is enabled
    */
   public static final String DEUTERANOPIA_MODE = "DEUTERANOPIA_MODE";
+
+  public static final String HIGH_CONTRAST_MODE = "highContrastMode";
 }

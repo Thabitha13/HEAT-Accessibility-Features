@@ -22,6 +22,7 @@ import java.awt.event.MouseWheelListener;
 
 public class JEditTextAreaWithMouseWheel extends JEditTextArea
   implements MouseWheelListener {
+  private static final long serialVersionUID = 1L;
   private int mouseWheelUnit = 3;
 
   public JEditTextAreaWithMouseWheel() {

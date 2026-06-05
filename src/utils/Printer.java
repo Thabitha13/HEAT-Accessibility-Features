@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -107,6 +108,7 @@ public class Printer {
 
 
 class OnePage extends JTextPane implements Printable {
+  private static final long serialVersionUID = 1L;
   private final static int POINTS_PER_INCH = 72;
   /* the number of pages the text is printed on. */
   int pages = 0;
@@ -176,7 +178,7 @@ class OnePage extends JTextPane implements Printable {
     double scale = 1.0;
     g2d.setFont(jetarea.getPainter().getFontMetrics().getFont());
     g2d.setClip((int) (pageFormat.getImageableX()),
-      (int) (pageFormat.getImageableY()), (int) lineLen,
+      (int) (pageFormat.getImageableY()), lineLen,
       (int) pageFormat.getHeight());
 
     if (lineLen > pageFormat.getImageableWidth()) {

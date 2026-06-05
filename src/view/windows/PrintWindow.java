@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -121,7 +122,7 @@ public class PrintWindow {
   }
 
   public void printCode() {
-    printer.print(wm.getEditorWindow().getTextPane());
+    printer.print(view.windows.EditorWindow.getTextPane());
   }
 
   public void printOutput() {

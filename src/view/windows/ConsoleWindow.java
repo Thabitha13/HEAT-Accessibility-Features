@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -121,7 +122,7 @@ public class ConsoleWindow {
     /* Use font size from settings if it exists */
     String fontSize = sm.getSetting(Settings.OUTPUT_FONT_SIZE);
 
-    if ((fontSize != null) && (fontSize != "")) {
+    if ((fontSize != null) && !fontSize.isEmpty()) {
       try {
         int size = Integer.parseInt(fontSize);
         displayFont = new Font(Font.MONOSPACED, Font.PLAIN, size);
@@ -465,86 +466,87 @@ public class ConsoleWindow {
   }
 
   public void charFromInterpreter(char c) {
-    if (hideCommand) {
-      if (im.isEndOfPrompt(c)) {
-        hideCommand = false;
-      }
-    } else if (interrupted) {
-      if (im.isStartOfPrompt(c)) {
-        interrupted = false;
-        withinPrompt = true;
-      }
-    } else if (testing) {
-      if (im.isStartOfPrompt(c)) {
-        // record test result
-        log.warning("[ConsoleWindow] testing: record test result " + currentTest);
-        utils.parser.ParsedTest test = (utils.parser.ParsedTest) managers.ParserManager.getParser().getTests()
-            .get(currentTest);
-        if (buffer.indexOf(sm.getSetting(Settings.TEST_POSITIVE)) != -1) {
-          test.setState("testPassed");
-        } else {
-          test.setState("testFailed");
-        }
-        wm.getTreeWindow().repaintProperties();
-      } else if (im.isEndOfPrompt(c)) {
-        // move to next test or finish testing
-        log.warning("[ConsoleWindow] testing: move to next or finish");
-        buffer = new StringBuilder();
-        currentTest++;
-        if (currentTest >= managers.ParserManager.getParser().getTests().size()) {
-          testing = false;
-          wm.restoreStatus();
-        }
-      } else {
-        if (c == '\b') {
-          buffer.deleteCharAt(buffer.length() - 1);
-        } else {
-          buffer.append(c);
-        }
-      }
-    } else if (im.isStartOfPrompt(c)) {
-      withinPrompt = true;
-      // Remove anything before the prompt in the current line
-      // Needed at interpreter startup when prompt is changed but
-      // old prompt still appears.
-      try {
-        fixed(false);
-        jtaIODoc.remove(currentLineStart, jtaIODoc.getLength() - currentLineStart);
-        fixedContentEnd = jtaIODoc.getLength();
-        fixed(true);
-      } catch (BadLocationException e) {
-        log.warning("[ConsoleWindow]: Could not remove text before prompt.");
-        e.printStackTrace();
-      }
-    } else if (im.isEndOfPrompt(c)) {
-      withinPrompt = false;
-      outputInput(' ', true);
-      commandEditing(true);
-      if (compiling) {
-        if (errorCount > 0) {
-          wm.setStatusCompiledError();
-        } else {
-          wm.setStatusCompiledCorrect();
-          getFocus();
-        }
-      } else {
-        wm.restoreStatus();
-      }
-      compiling = false;
-      error = false;
-      errorCount = 0;
-    } else if (withinPrompt) {
-      outputPrompt(c);
-    } else {
-      outputNormal(c);
-    }
-  }
 
-  /**
-   * Prepare for receiving test results.
-   * Assumes state CompiledCorrect.
-   *
-   */
+            if (hideCommand) {
+                if (im.isEndOfPrompt(c)) {
+                    hideCommand = false;
+                }
+            } else if (interrupted) {
+	    	if (im.isStartOfPrompt(c)) {
+	    		interrupted = false;
+	    		withinPrompt = true;
+	    	}
+	    } else if (testing) {
+	    	if (im.isStartOfPrompt(c)) {
+	    		// record test result
+	    		log.warning("[ConsoleWindow] testing: record test result " + currentTest);
+	    		utils.parser.ParsedTest test = managers.ParserManager.getParser().getTests().get(currentTest);
+	    		if (buffer.indexOf(sm.getSetting(Settings.TEST_POSITIVE)) != -1) {
+	    			test.setState("testPassed");
+	    		} else {
+	    			test.setState("testFailed");	    			
+	    		}
+	    		wm.getTreeWindow().repaintProperties();
+	    	} else if (im.isEndOfPrompt(c)) {
+	    		// move to next test or finish testing
+	    		log.warning("[ConsoleWindow] testing: move to next or finish");
+	    		buffer = new StringBuilder();
+	    		currentTest++;
+	    		if (currentTest >= managers.ParserManager.getParser().getTests().size()) {
+                            testing = false;
+		    	    wm.restoreStatus();
+	    		}
+	    	} else {
+	    		if (c == '\b') {
+                            buffer.deleteCharAt(buffer.length()-1);
+                        } else { 
+                            buffer.append(c);
+                        }
+	    	}
+	    } else if (im.isStartOfPrompt(c)) {
+		withinPrompt = true;
+                // Remove anything before the prompt in the current line
+                // Needed at interpreter startup when prompt is changed but 
+                // old prompt still appears.
+                try {
+                    fixed(false);
+                    jtaIODoc.remove(currentLineStart,jtaIODoc.getLength()-currentLineStart); 
+                    fixedContentEnd = jtaIODoc.getLength();
+                    fixed(true);
+                } catch (BadLocationException e) {
+                    log.warning("[ConsoleWindow]: Could not remove text before prompt.");
+                    e.printStackTrace();
+                }
+            } else if (im.isEndOfPrompt(c)) {
+	    	withinPrompt = false;
+	    	outputInput(' ', true);
+	    	commandEditing(true);
+                if (compiling) {
+                    if (errorCount>0) {
+                        wm.setStatusCompiledError();
+                    } else {
+                        wm.setStatusCompiledCorrect();
+                        getFocus();
+                    }
+                } else {
+                    wm.restoreStatus();
+                    wm.notifyInterpreterReady();
+                }
+	    	compiling = false;
+	    	error = false;
+                errorCount = 0;
+	    } else if (withinPrompt) {
+	    	outputPrompt(c);
+	    } else {
+	    	outputNormal(c);
+	    }
+	  }
+	  
+/**
+ * Prepare for receiving test results.
+ * Assumes state CompiledCorrect.
+ *
+ */
   public void readyToReceiveTestResults() {
     testing = true;
     currentTest = 0;
@@ -625,7 +627,7 @@ public class ConsoleWindow {
   }
 
  public void refreshStyles() {
-  System.out.println("refreshStyles START");
+ // System.out.println("refreshStyles START");
     StyleConstants.setForeground(errorText, ColorThemeManager.getErrorColor());
     StyleConstants.setForeground(promptText, ColorThemeManager.getPromptColor());
     
@@ -645,7 +647,7 @@ public class ConsoleWindow {
          }
      }
      jtaInterpreterOutput.repaint();
-         System.out.println("refreshStyles END");
+         //System.out.println("refreshStyles END");
 
 }
 }

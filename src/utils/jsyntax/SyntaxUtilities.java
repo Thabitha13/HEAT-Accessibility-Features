@@ -146,7 +146,7 @@ public class SyntaxUtilities {
         styles[id].setGraphicsFlags(gfx, defaultFont);
 
       line.count = length;
-      x = Utilities.drawTabbedText(line, x, y, gfx, expander, 0);
+      x = (int) Utilities.drawTabbedText(line, (float)x, (float)y, (java.awt.Graphics2D)gfx, expander, 0);
       line.offset += length;
       offset += length;
 

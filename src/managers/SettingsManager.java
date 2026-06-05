@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -54,28 +55,25 @@ public class SettingsManager {
    * based on the default settings.
    */
   public void loadSettings() {
-    InputStream settingsFileStream;
     try {
       settingsFile = new File(SETTINGS_PATH + SETTINGS_FILE);
       /* File exists use that */
       if (settingsFile.exists()) {
-        settingsFileStream = new FileInputStream(settingsFile);
-        heatSettings.load(settingsFileStream);
+        try (InputStream stream = new FileInputStream(settingsFile)) {
+          heatSettings.load(stream);
+        }
         Properties defaultSettings = createDefaultProperties();
         /* Check that interpreter path exists */
         if (heatSettings.getProperty(Settings.INTERPRETER_PATH)==null) {
             newSettingsFile = true;
         }
         /* Check all default settings exist */
-        Enumeration<?> e = defaultSettings.propertyNames();
-        while (e.hasMoreElements()) {
-          String name = (String) e.nextElement();
+        for (String name : defaultSettings.stringPropertyNames()) {
           if (heatSettings.getProperty(name) == null) {
             String value = getDefault(name);
             heatSettings.setProperty(name, value);
           }
         }
-        settingsFileStream.close();
       }
       /* File does not exist, create default */
       else {
@@ -120,11 +118,10 @@ public class SettingsManager {
    * Writes the settings to the settings file
    */
   public void saveSettings() {
-    OutputStream settingsFile;
     try {
-      settingsFile = new FileOutputStream(SETTINGS_PATH + SETTINGS_FILE);
-      heatSettings.store(settingsFile, "HEAT SETTINGS");
-      settingsFile.close();
+      try (OutputStream settingsFile = new FileOutputStream(SETTINGS_PATH + SETTINGS_FILE)) {
+        heatSettings.store(settingsFile, "HEAT SETTINGS");
+      }
       JOptionPane.showMessageDialog(WindowManager.getInstance()
                                                  .getMainScreenFrame(),
         "Settings Saved", "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -169,5 +166,9 @@ public class SettingsManager {
 
   public boolean isHaveChanges() {
 	return haveChanges;
+  }
+
+  public boolean isHighContrastEnabled() {
+    return "true".equalsIgnoreCase(getSetting(Settings.HIGH_CONTRAST_MODE));
   }
 }

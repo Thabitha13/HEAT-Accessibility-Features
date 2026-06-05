@@ -1,4 +1,5 @@
-/**
+/*
+
  *
  * Copyright (c) 2005 University of Kent
  * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
@@ -90,7 +91,7 @@ public class InterpreterParser {
      * @param int How many results have been collected.
      */
    public void parseTestResults(String []output, int countResult){
-	    ArrayList tests=ParserManager.getInstance().getParser().getTests();
+	    ArrayList<ParsedTest> tests=ParserManager.getParser().getTests();
 	    for (int i=0;i<countResult;i++){
 	      if (tests.size()>0){
             String myResult = output[i].trim();
@@ -100,8 +101,8 @@ public class InterpreterParser {
             {
             /*TutorialWindow.changeText("<h3>TEST RESULT: <span style=\"color: green\">PASSED</span></h3>Test: <b>" + currentTest.getName() + "</b><br>Expected: <b style=\"color:green\">" + currentTest.getName() + "</b><br>Result: <b style=\"color:green\">" + myResult + "</b>");
             wm.showTutorial();*/
-            ((ParsedTest) ParserManager.getInstance().getParser().getTests()
-              .get(i)).setState("testPassed");
+            ParserManager.getParser().getTests()
+              .get(i).setState("testPassed");
             
             } else {
             // check if parser produced an error
@@ -109,8 +110,8 @@ public class InterpreterParser {
               {
                 myResult = "Syntax error in the test line";
               }
-              ((ParsedTest) ParserManager.getInstance().getParser().getTests()
-                .get(i)).setState("testFailed");
+              ParserManager.getParser().getTests()
+                .get(i).setState("testFailed");
               /*TutorialWindow.changeText("<h3>TEST RESULT: <span style=\"color: red\">FAILED</span></h3>Test: <b>" + currentTest.getName() + "</b><br>Expected: <b style=\"color:green\">" + currentTest.getName() + "</b><br>Result: <b style=\"color:red\">" + myResult + "</b>");
               wm.showTutorial();*/
             }
@@ -129,7 +130,7 @@ public class InterpreterParser {
       errorFound = status;
   }
   
-  /**
+  /*
    * Main method that parses the output from the interpreter. This checks for 
    * the known error text within the String and if found looks up a definition 
    * for this in the xml error file.
@@ -256,7 +257,7 @@ public class InterpreterParser {
   }
   */
   
-  /**
+  /*
    * Parses a character at a time to retrieve the line number.
    * @param letter The input (int) character to parse.
    */

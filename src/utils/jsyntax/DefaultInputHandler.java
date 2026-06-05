@@ -32,7 +32,7 @@ public class DefaultInputHandler extends InputHandler {
    * Creates a new input handler with no key bindings defined.
    */
   public DefaultInputHandler() {
-    bindings = currentBindings = new Hashtable();
+    bindings = currentBindings = new Hashtable<>();
   }
 
   /**
@@ -53,6 +53,7 @@ public class DefaultInputHandler extends InputHandler {
     addKeyBinding("HOME", HOME);
     addKeyBinding("END", END);
     addKeyBinding("C+A", SELECT_ALL);
+    addKeyBinding("M+A", SELECT_ALL);
     addKeyBinding("S+HOME", SELECT_HOME);
     addKeyBinding("S+END", SELECT_END);
     addKeyBinding("C+HOME", DOCUMENT_HOME);
@@ -118,6 +119,12 @@ public class DefaultInputHandler extends InputHandler {
     
     addKeyBinding ("C+T", ActionManager.getInstance().getTestAction());
     addKeyBinding ("M+T", ActionManager.getInstance().getTestAction());
+
+        // F-key shortcuts for accessibility — work even when editor has focus
+    addKeyBinding ("F5", ActionManager.getInstance().getCompileAction());
+    addKeyBinding ("F6", ActionManager.getInstance().getInterruptAction());
+    addKeyBinding ("F7", ActionManager.getInstance().getTestAction());
+    addKeyBinding ("F1", ActionManager.getInstance().getKeyboardGuideAction());
   }
 
   /**
@@ -133,7 +140,7 @@ public class DefaultInputHandler extends InputHandler {
    * The action
    */
   public void addKeyBinding(String keyBinding, ActionListener action) {
-    Hashtable current = bindings;
+    Hashtable<Object, Object> current = bindings;
 
     StringTokenizer st = new StringTokenizer(keyBinding);
     while (st.hasMoreTokens()) {
@@ -144,11 +151,11 @@ public class DefaultInputHandler extends InputHandler {
       if (st.hasMoreTokens()) {
         Object o = current.get(keyStroke);
         if (o instanceof Hashtable)
-          current = (Hashtable) o;
+          current = (Hashtable<Object, Object>) o;
         else {
-          o = new Hashtable();
+          o = new Hashtable<>();
           current.put(keyStroke, o);
-          current = (Hashtable) o;
+          current = (Hashtable<Object, Object>) o;
         }
       } else
         current.put(keyStroke, action);
@@ -186,7 +193,7 @@ public class DefaultInputHandler extends InputHandler {
    */
   public void keyPressed(KeyEvent evt) {
     int keyCode = evt.getKeyCode();
-    int modifiers = evt.getModifiers();
+    int modifiers = evt.getModifiersEx();
 
     if (keyCode == KeyEvent.VK_CONTROL || keyCode == KeyEvent.VK_SHIFT
         || keyCode == KeyEvent.VK_ALT || keyCode == KeyEvent.VK_META)
@@ -195,7 +202,7 @@ public class DefaultInputHandler extends InputHandler {
     wm.getEditorWindow().setModified();
     wm.setStatusUncompiled();
 
-    if ((modifiers & ~KeyEvent.SHIFT_MASK) != 0 || evt.isActionKey()
+    if ((modifiers & ~InputEvent.SHIFT_DOWN_MASK) != 0 || evt.isActionKey()
         || keyCode == KeyEvent.VK_BACK_SPACE || keyCode == KeyEvent.VK_DELETE
         || keyCode == KeyEvent.VK_ENTER || keyCode == KeyEvent.VK_TAB
         || keyCode == KeyEvent.VK_ESCAPE) {
@@ -229,7 +236,7 @@ public class DefaultInputHandler extends InputHandler {
         evt.consume();
         return;
       } else if (o instanceof Hashtable) {
-        currentBindings = (Hashtable) o;
+        currentBindings = (Hashtable<Object, Object>) o;
         evt.consume();
         return;
       }
@@ -240,15 +247,15 @@ public class DefaultInputHandler extends InputHandler {
    * Handle a key typed event. This inserts the key into the text area.
    */
   public void keyTyped(KeyEvent evt) {
-    int modifiers = evt.getModifiers();
+    int modifiers = evt.getModifiersEx();
     char c = evt.getKeyChar();
-    if (c != KeyEvent.CHAR_UNDEFINED && (modifiers & KeyEvent.ALT_MASK) == 0) {
+    if (c != KeyEvent.CHAR_UNDEFINED && (modifiers & InputEvent.ALT_DOWN_MASK) == 0) {
       if (c >= 0x20 && c != 0x7f) {
         KeyStroke keyStroke = KeyStroke.getKeyStroke(Character.toUpperCase(c));
         Object o = currentBindings.get(keyStroke);
 
         if (o instanceof Hashtable) {
-          currentBindings = (Hashtable) o;
+          currentBindings = (Hashtable<Object, Object>) o;
           return;
         } else if (o instanceof ActionListener) {
           currentBindings = bindings;
@@ -271,7 +278,7 @@ public class DefaultInputHandler extends InputHandler {
         }
 
         // hack to ensure that meta+key are not inserted as normal chars
-        if ((modifiers & KeyEvent.META_MASK) == 0) {
+        if ((modifiers & InputEvent.META_DOWN_MASK) == 0) {
             executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(evt
                 .getKeyChar()));
         }
@@ -301,16 +308,16 @@ public class DefaultInputHandler extends InputHandler {
       for (int i = 0; i < index; i++) {
         switch (Character.toUpperCase(keyStroke.charAt(i))) {
           case 'A':
-            modifiers |= InputEvent.ALT_MASK;
+            modifiers |= InputEvent.ALT_DOWN_MASK;
             break;
           case 'C':
-            modifiers |= InputEvent.CTRL_MASK;
+            modifiers |= InputEvent.CTRL_DOWN_MASK;
             break;
           case 'M':
-            modifiers |= InputEvent.META_MASK;
+            modifiers |= InputEvent.META_DOWN_MASK;
             break;
           case 'S':
-            modifiers |= InputEvent.SHIFT_MASK;
+            modifiers |= InputEvent.SHIFT_DOWN_MASK;
             break;
         }
       }
@@ -340,9 +347,9 @@ public class DefaultInputHandler extends InputHandler {
   }
 
   // private members
-  private Hashtable bindings;
+  private Hashtable<Object, Object> bindings;
 
-  private Hashtable currentBindings;
+  private Hashtable<Object, Object> currentBindings;
 
   private DefaultInputHandler(DefaultInputHandler copy) {
     bindings = currentBindings = copy.bindings;

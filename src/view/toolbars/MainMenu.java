@@ -20,6 +20,7 @@ import managers.ActionManager;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 // import com.apple.eawt.Application;
 
@@ -56,6 +57,7 @@ public class MainMenu {
   private JMenu jMenuHelp = new JMenu();
   private JMenuItem jMenuItemContents = new JMenuItem();
   private JMenuItem jMenuItemAbout = new JMenuItem();
+  private JMenuItem jMenuItemKeyboardGuide = new JMenuItem();
 
   private ActionManager.UndoAction undoAction = ActionManager.getInstance()
                                                              .getUndoAction();
@@ -134,25 +136,31 @@ public class MainMenu {
     jMenuRun.setMnemonic('r');
     jMenuItemCompile.setAction(am.getCompileAction());
     jMenuItemCompile.setText("Load & Compile");
+    jMenuItemCompile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
     jMenuItemCompile.setMnemonic('c');
     jMenuItemInterrupt.setAction(am.getInterruptAction());
     jMenuItemInterrupt.setText("Interrupt");
+    jMenuItemInterrupt.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F6, 0));
     jMenuItemInterrupt.setMnemonic('i');
     jMenuItemTest.setAction(am.getTestAction());
     jMenuItemTest.setText("Test");
+    jMenuItemTest.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, 0));
     jMenuItemTest.setMnemonic('t');
     jMenuRun.add(jMenuItemCompile);
     jMenuRun.add(jMenuItemInterrupt);
     jMenuRun.add(jMenuItemTest);
 
     /* Help Menu */
-    jMenuHelp.setText("Help");
-    jMenuHelp.setMnemonic('H');
     jMenuItemContents.setAction(am.getShowHelpAction());
     jMenuItemAbout.setText("About");
     jMenuItemAbout.setAction(am.getShowAboutAction());
     jMenuItemAbout.setMnemonic('a');
+    jMenuItemKeyboardGuide.setText("Keyboard Shortcuts");
+    jMenuItemKeyboardGuide.setAction(am.getKeyboardGuideAction());
+    jMenuItemKeyboardGuide.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
     jMenuHelp.add(jMenuItemContents);
+    jMenuHelp.addSeparator();
+    jMenuHelp.add(jMenuItemKeyboardGuide);
     jMenuHelp.addSeparator();
     jMenuHelp.add(jMenuItemAbout);
 

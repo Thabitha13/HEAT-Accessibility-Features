@@ -55,9 +55,10 @@ import java.util.Vector;
  * @version $Id: JEditTextArea.java,v 1.36 1999/12/13 03:40:30 sp Exp $
  */
 public class JEditTextArea extends JComponent {
+  private static final long serialVersionUID = 1L;
   
   
-  WindowManager wm = WindowManager.getInstance();
+  transient WindowManager wm = WindowManager.getInstance();
   
   /**
    * Adding components with this name to the text area will place them left of
@@ -132,6 +133,7 @@ public class JEditTextArea extends JComponent {
    * Returns if this component can be traversed by pressing the Tab key. This
    * returns false.
    */
+  @SuppressWarnings("deprecation")
   public final boolean isManagingFocus() {
     return false;
   }
@@ -481,7 +483,7 @@ public class JEditTextArea extends JComponent {
     /* If syntax coloring is disabled, do simple translation */
     if (tokenMarker == null) {
       lineSegment.count = offset;
-      return x + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
+      return x + (int) Utilities.getTabbedTextWidth(lineSegment, fm, (float)x, painter, 0);
     }
     /*
      * If syntax coloring is enabled, we have to do this because tokens can vary
@@ -517,10 +519,10 @@ public class JEditTextArea extends JComponent {
         if (offset + segmentOffset < lineSegment.offset + length) {
           lineSegment.count = offset - (lineSegment.offset - segmentOffset);
           return x
-              + Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
+              + (int) Utilities.getTabbedTextWidth(lineSegment, fm, (float)x, painter, 0);
         } else {
           lineSegment.count = length;
-          x += Utilities.getTabbedTextWidth(lineSegment, fm, x, painter, 0);
+          x += (int) Utilities.getTabbedTextWidth(lineSegment, fm, (float)x, painter, 0);
           lineSegment.offset += length;
         }
         tokens = tokens.next;
@@ -1488,13 +1490,13 @@ public class JEditTextArea extends JComponent {
 
   protected boolean scrollBarsInitialized;
 
-  protected InputHandler inputHandler;
+  protected transient InputHandler inputHandler;
 
   protected SyntaxDocument document;
 
-  protected DocumentHandler documentHandler;
+  protected transient DocumentHandler documentHandler;
 
-  protected Segment lineSegment;
+  protected transient Segment lineSegment;
 
   protected int selectionStart;
 
@@ -1646,9 +1648,9 @@ public class JEditTextArea extends JComponent {
       right.setBounds(ileft + centerWidth, itop, rightWidth, centerHeight);
 
       // Lay out all status components, in order
-      Enumeration status = leftOfScrollBar.elements();
+      Enumeration<Component> status = leftOfScrollBar.elements();
       while (status.hasMoreElements()) {
-        Component comp = (Component) status.nextElement();
+        Component comp = status.nextElement();
         Dimension dim = comp.getPreferredSize();
         comp.setBounds(ileft, itop + centerHeight, dim.width, bottomHeight);
         ileft += dim.width;
@@ -1665,7 +1667,7 @@ public class JEditTextArea extends JComponent {
 
     private Component bottom;
 
-    private Vector leftOfScrollBar = new Vector();
+    private Vector<Component> leftOfScrollBar = new Vector<>();
   }
 
   static class CaretBlinker implements ActionListener {
@@ -1676,6 +1678,7 @@ public class JEditTextArea extends JComponent {
   }
 
   class MutableCaretEvent extends CaretEvent {
+    private static final long serialVersionUID = 1L;
     MutableCaretEvent() {
       super(JEditTextArea.this);
     }
@@ -1776,7 +1779,7 @@ public class JEditTextArea extends JComponent {
       if (popup != null && popup.isVisible())
         return;
 
-      setSelectionRectangular((evt.getModifiers() & InputEvent.CTRL_MASK) != 0);
+      setSelectionRectangular((evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0);
       select(getMarkPosition(), xyToOffset(evt.getX(), evt.getY()));
     }
 
@@ -1804,7 +1807,7 @@ public class JEditTextArea extends JComponent {
       setCaretVisible(true);
       focusedComponent = JEditTextArea.this;
 
-      if ((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null) {
+      if ((evt.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0 && popup != null) {
         popup.show(painter, evt.getX(), evt.getY());
         return;
       }
@@ -1833,8 +1836,8 @@ public class JEditTextArea extends JComponent {
     }
 
     private void doSingleClick(MouseEvent evt, int line, int offset, int dot) {
-      if ((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-        rectSelect = (evt.getModifiers() & InputEvent.CTRL_MASK) != 0;
+      if ((evt.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+        rectSelect = (evt.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
         select(getMarkPosition(), dot);
       } else
         setCaretPosition(dot);
@@ -1916,6 +1919,7 @@ public class JEditTextArea extends JComponent {
   }
 
   class CaretUndo extends AbstractUndoableEdit {
+    private static final long serialVersionUID = 1L;
     private int start;
 
     private int end;
