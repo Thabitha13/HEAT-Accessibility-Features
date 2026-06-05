@@ -196,3 +196,9 @@ As a blind student, I want to hear a plain English explanation instead of raw GH
 | AC-19 | Any state | "Couldn't match type" | Speaks "Error: type mismatch. Two parts of your code expect different types." | ✅ Pass |
 | AC-20 | Any state | Unknown error | Raw error line spoken as fallback | ✅ Pass |
 | AC-21 | Any state | Detail lines e.g. "In the expression:" | Not spoken — filtered out | ✅ Pass |
+---
+
+## Repository Housekeeping — 5 June 2026
+
+### Update
+- Tightened the project `.gitignore` so Eclipse metadata, compiled output, and macOS `.DS_Store` files stay out of version control.
