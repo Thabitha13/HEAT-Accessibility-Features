@@ -1,0 +1,136 @@
+@startuml KeyboardFileExplorerDialog - Activity Diagram
+
+skinparam ActivityBorderColor #444444
+skinparam ActivityBackgroundColor #FAFAFA
+skinparam ActivityDiamondBorderColor #444444
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #AAAAAA
+skinparam ArrowColor #555555
+
+title KeyboardFileExplorerDialog - 4-panel CardLayout flow
+
+start
+
+:Show SEARCH panel;
+note right
+  TTSManager speaks on open:
+  "Navigate File Explorer.
+  Type a Haskell file name
+  and press Enter to search."
+end note
+
+repeat
+
+  :User types filename fragment, presses Enter;
+
+  :searchRecursive(home, query, results, 0);
+  note right
+    MAX_DEPTH = 8, MAX_RESULTS = 50.
+    Synchronous on EDT.
+    Fuzzy fallback: shorten query
+    until some match found.
+  end note
+
+  if (no results?) then (yes)
+    :Show "did you mean?" suggestions dialog;
+  else (results found)
+    :Fill JList, focus result list;
+    note right
+      TTSManager speaks:
+      "N file(s) found. Press Enter to continue."
+    end note
+  endif
+
+repeat while (no results or user presses Cmd+[?) is (yes)
+
+:User selects result, presses Enter;
+
+:Show ACTION panel;
+note right
+  TTSManager speaks:
+  "File selected: [name].
+  Press Tab to choose:
+  Open File, or Move and Copy File."
+end note
+
+fork
+  :User presses Cmd+[ (back to search);
+  :Show SEARCH panel;
+  stop
+
+fork again
+  :User chooses "Open File";
+  :WindowManager.openFile(selectedFile);
+  :dispose();
+  stop
+
+fork again
+  :User chooses "Move / Copy File";
+
+  :Show MOVE_SRC panel;
+  note right
+    TTSManager speaks:
+    "Current location: [path].
+    Press Tab to choose destination."
+  end note
+
+  :User presses "Choose destination";
+
+  :Show MOVE_TGT panel;
+  note right
+    TTSManager speaks:
+    "Enter destination directory.
+    Type the path and press Tab
+    to choose Move or Copy File."
+  end note
+
+  repeat
+
+    :User types destination directory;
+
+    :Expand "~", call mkdirs() if needed;
+
+    if (directory invalid?) then (yes)
+      :Show error in status label;
+    else (ok)
+      :dest = new File(targetDir, filename);
+
+      if (dest exists?) then (yes)
+        :Show overwrite confirmation dialog;
+        if (user says No?) then (yes)
+          :Re-enter destination;
+        else (overwrite)
+          fork
+            :User presses "Move File";
+            :Files.copy(src, dest, REPLACE_EXISTING);
+            :selectedFile.delete();
+          fork again
+            :User presses "Copy File";
+            :Files.copy(src, dest, REPLACE_EXISTING);
+          end fork
+          :Show confirmation dialog;
+          :dispose();
+          stop
+        endif
+      else (no conflict)
+        fork
+          :User presses "Move File";
+          :Files.copy(src, dest, REPLACE_EXISTING);
+          :selectedFile.delete();
+        fork again
+          :User presses "Copy File";
+          :Files.copy(src, dest, REPLACE_EXISTING);
+        end fork
+        :Show confirmation dialog;
+        :dispose();
+        stop
+      endif
+    endif
+
+  repeat while (user retries?) is (yes)
+
+end fork
+
+stop
+
+@enduml

@@ -1,0 +1,100 @@
+@startuml Accessible Startup Interface - Activity Diagram
+
+skinparam ActivityBorderColor #444444
+skinparam ActivityBackgroundColor #FAFAFA
+skinparam ActivityDiamondBorderColor #444444
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #AAAAAA
+skinparam ArrowColor #555555
+
+title Accessible Startup Interface (SplashWindow)
+
+|Main thread|
+|KeyboardFocusManager|
+|TTSManager|
+|ActionManager|
+
+start
+
+|Main thread|
+:Create SplashWindow (undecorated JFrame);
+:setVisible(true);
+note right
+  Main window not yet built.
+  No Swing component has focus.
+end note
+
+:Register KeyEventDispatcher globally;
+note right
+  KeyboardFocusManager.addKeyEventDispatcher()
+  intercepts ALL key events system-wide
+  before any component receives them.
+  InputMap / ActionMap cannot be used here -
+  no window has focus yet.
+end note
+
+:Start SettingsManager, WindowManager, GHCi;
+:Build main window (createGUI);
+
+|TTSManager|
+note right
+  After Thread.sleep(2000),
+  setStartupComplete() fires -
+  TTS now active.
+end note
+:speak("Welcome to HEAT. Press Cmd+N to create...");
+
+|KeyboardFocusManager|
+:Wait for key event;
+
+fork
+  :Cmd+N pressed;
+  |TTSManager|
+  :speak("Creating new Haskell file.");
+  |ActionManager|
+  :triggerNewFile();
+  :Open KeyboardNewFileDialog;
+  |Main thread|
+  :dismiss();
+  note right
+    removeKeyEventDispatcher()
+    setVisible(false)
+    dispose()
+  end note
+  stop
+
+fork again
+  :Cmd+O pressed;
+  |ActionManager|
+  :triggerOpenFile();
+  :Open KeyboardOpenFileDialog;
+  |Main thread|
+  :dismiss();
+  stop
+
+fork again
+  :Escape pressed;
+  |TTSManager|
+  :stopSpeaking();
+  note right
+    Clears queue and kills
+    any in-progress speech process.
+  end note
+  |Main thread|
+  :dismiss();
+  stop
+
+fork again
+  :Compilation succeeds later;
+  note right
+    WindowManager.setStatus(COMPILEDCORRECT)
+    calls wm.dismissSplash()
+    automatically.
+  end note
+  |Main thread|
+  :dismiss();
+  stop
+
+end fork
+
+@enduml

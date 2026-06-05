@@ -1,0 +1,96 @@
+@startuml KeyboardOpenFileDialog - Activity Diagram
+
+skinparam ActivityBorderColor #444444
+skinparam ActivityBackgroundColor #FAFAFA
+skinparam ActivityDiamondBorderColor #444444
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #AAAAAA
+skinparam ArrowColor #555555
+
+title KeyboardOpenFileDialog - user interaction flow
+
+start
+
+:Open dialog (modal);
+note right
+  TTSManager speaks on windowOpened:
+  "Search for a Haskell file.
+  Type the file name and press Enter."
+end note
+
+fork
+  :User presses Escape at any time;
+  :result = null, dispose();
+  stop
+fork again
+
+  repeat
+
+    :User types filename fragment in search field;
+    :Presses Enter or Search button;
+
+    if (query empty?) then (yes)
+      :Show warning, focus filename field;
+    else (no)
+      :Expand "~" in directory field;
+
+      if (directory not found?) then (yes)
+        :Show warning, focus directory field;
+      else (ok)
+
+        :searchRecursive(root, query, results, 0);
+        note right
+          Synchronous on EDT - no SwingWorker.
+          MAX_RESULTS = 50, MAX_DEPTH = 6.
+          Matches .hs and .lhs files only.
+        end note
+
+        if (no results?) then (yes)
+          :TTSManager speaks "No files found...";
+          :Show info dialog, focus filename field;
+        else (results found)
+          :Populate JList;
+          :resultList.setSelectedIndex(0);
+          note right
+            TTSManager speaks count:
+            "N files found. Use arrow keys...
+            Press Cmd+F5 to hear the path.
+            Press Enter to open."
+          end note
+          :Focus moves to result list;
+
+          fork
+            :User presses Cmd+[ (back);
+            :filenameField.requestFocus();
+          fork again
+            :User presses arrow key up/down;
+            :Selection changes in JList;
+            note right
+              ListSelectionListener fires.
+              TTSManager speaks filename only
+              (not full path) for fast scanning.
+            end note
+          fork again
+            :User presses Cmd+F5;
+            :TTSManager speaks full absolute path;
+          fork again
+            :User presses Enter or Open;
+            if (no selection yet?) then (yes)
+              :performSearch() first;
+            else (file selected)
+              :result = selectedFile;
+              :dispose();
+              stop
+            endif
+          end fork
+        endif
+      endif
+    endif
+
+  repeat while (user retries?) is (yes)
+
+end fork
+
+stop
+
+@enduml

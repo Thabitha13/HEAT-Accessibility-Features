@@ -1,0 +1,99 @@
+@startuml Colour Blind Mode - Sequence Diagram
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceParticipantBorderColor #444444
+skinparam sequenceParticipantBackgroundColor #FAFAFA
+skinparam noteBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+
+title Deuteranopia colour blind mode - toggle sequence
+
+participant "User\n(Cmd+Shift+C)" as User
+participant "ActionManager\nToggleColourBlindAction" as AM
+participant "ColorThemeManager\n(static)" as CTM
+participant "SettingsManager\n(singleton)" as SM
+participant "ConsoleWindow\n(via WindowManager)" as CW
+
+== Toggle ON ==
+
+User -> AM : actionPerformed()
+activate AM
+
+AM -> CTM : isDeuteranopiaEnabled()
+activate CTM
+CTM --> AM : false
+deactivate CTM
+
+AM -> CTM : setDeuteranopiaMode(true)
+activate CTM
+note right of CTM
+  deuteranopiaEnabled = true
+  Static field - no I/O, instant.
+end note
+deactivate CTM
+
+AM -> SM : setSetting("DEUTERANOPIA_MODE", "true")
+activate SM
+SM --> AM : ok
+deactivate SM
+
+AM -> CW : repaint / reapply colours
+activate CW
+note right of CW
+  ConsoleWindow queries
+  ColorThemeManager.getErrorColor()
+  ColorThemeManager.getPromptColor()
+  on next render.
+  Returns #E69F00 (amber) for errors,
+  #0072B2 (blue) for prompts.
+end note
+CW --> AM : done
+deactivate CW
+deactivate AM
+
+== Console renders with new colours ==
+
+CW -> CTM : getErrorColor()
+activate CTM
+CTM --> CW : new Color(230, 159, 0)  [#E69F00]
+deactivate CTM
+
+CW -> CTM : getPromptColor()
+activate CTM
+CTM --> CW : new Color(0, 114, 178)  [#0072B2]
+deactivate CTM
+
+== Toggle OFF ==
+
+User -> AM : actionPerformed() (second press)
+activate AM
+
+AM -> CTM : isDeuteranopiaEnabled()
+activate CTM
+CTM --> AM : true
+deactivate CTM
+
+AM -> CTM : setDeuteranopiaMode(false)
+activate CTM
+note right of CTM
+  deuteranopiaEnabled = false
+  Reverts to DefaultTheme constants:
+  ERROR_COLOR  = #FF0000 (red)
+  PROMPT_COLOR = #00AA00 (green)
+end note
+deactivate CTM
+
+AM -> SM : setSetting("DEUTERANOPIA_MODE", "false")
+SM --> AM : ok
+
+AM -> CW : repaint / reapply colours
+CW --> AM : done
+deactivate AM
+
+note across
+  Setting persists to heat.settings on next
+  SettingsManager.saveSettings() call (Options > Apply).
+  In-session toggle is immediate with no file I/O.
+end note
+
+@enduml

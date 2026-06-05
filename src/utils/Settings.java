@@ -1,0 +1,35 @@
+package utils;
+
+/**
+ * Contains the static identifiers for the SettingsManager
+ */
+public class Settings {
+
+  /** The location of the desired Haskell interpreter */
+  public static final String INTERPRETER_PATH = "GHCI_PATH";
+
+  /** Command line options for the Haskell interpreter */
+  public static final String INTERPRETER_OPTS = "GHCI_OPTS";
+
+  /** The location used to store temporary files */
+  public static final String LIBRARY_PATH = "LIBRARY_PATH";
+
+  /** The font size used in the output window */
+  public static final String OUTPUT_FONT_SIZE = "OUTPUT_FONT_SIZE";
+
+  /** The font size used in the display window */
+  public static final String CODE_FONT_SIZE = "CODE_FONT_SIZE";
+
+  /** For Boolean unit tests or QuickCheck */
+  public static final String TEST_FUNCTION = "TEST_FUNCTION";
+  public static final String TEST_POSITIVE = "TEST_POSITIVE";
+
+  /** YOUR: TTS enabled/disabled */
+  public static final String TTS_ENABLED = "TTS_ENABLED";
+
+  /** Goutham: high-contrast mode for low vision */
+  public static final String HIGH_CONTRAST_MODE = "highContrastMode";
+
+  /** Thabitha: deuteranopia (red-green) colour mode */
+  public static final String DEUTERANOPIA_MODE = "DEUTERANOPIA_MODE";
+}

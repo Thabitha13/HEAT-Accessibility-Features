@@ -1,0 +1,108 @@
+@startuml TTS Path - Sequence Diagram
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceParticipantBorderColor #444444
+skinparam sequenceParticipantBackgroundColor #FAFAFA
+skinparam noteBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+skinparam sequenceLifeLineBorderColor #888888
+
+title GHCi output to spoken speech (compile error scenario)
+
+participant "GHCi process" as GHCi
+participant "InterpreterToConsole\n(Runnable)" as ITC
+participant "WindowManager\n(EDT)" as WM
+participant "TTSManager\n(singleton)" as TTS
+participant "ErrorSimplifier\n(static)" as ES
+participant "BlockingQueue<String>" as Q
+participant "TTS worker thread" as Worker
+participant "OS speech engine\n(say / espeak / PS)" as OS
+
+== Compilation and error detection ==
+
+GHCi -> ITC : character stream (stdout)
+activate ITC
+note right of ITC
+  bufferChar() called for each char.
+  On newline, calls processLine().
+end note
+ITC -> ITC : bufferChar('\n')
+ITC -> ITC : processLine("...error:...")
+
+ITC -> WM : setStatusCompiledError()
+activate WM
+
+WM -> TTS : speak("Compilation failed.\nFix the errors...")
+activate TTS
+
+note right of TTS
+  startupComplete guard:
+  if (!startupComplete) return
+  if (!isEnabled()) return
+end note
+
+TTS -> Q : add("Compilation failed...")
+TTS -> TTS : if (!isSpeaking) processQueue()
+deactivate WM
+
+TTS -> Worker : new Thread(processQueue)
+activate Worker
+deactivate TTS
+
+== Error detail lines ==
+
+ITC -> ITC : processLine("No instance for 'Fractional Int'...")
+ITC -> ES : simplify("No instance for...")
+activate ES
+ES --> ITC : "Error: wrong type of value..."
+deactivate ES
+
+ITC -> TTS : speak("Error: wrong type of value...")
+activate TTS
+TTS -> Q : add("Error: wrong type...")
+deactivate TTS
+
+ITC -> ITC : processLine("  • No instance for...")
+note right of ITC
+  inErrorBlock = true.
+  simplifiedSpokenForBlock = true
+  (already spoken this block),
+  so raw detail line is spoken instead.
+end note
+ITC -> TTS : speak("No instance for...")
+activate TTS
+TTS -> Q : add("No instance for...")
+deactivate TTS
+deactivate ITC
+
+== Queue drain on background thread ==
+
+Worker -> Q : poll() -> "Compilation failed..."
+Worker -> OS : exec(["say", "Compilation failed..."])
+activate OS
+OS --> Worker : process exits
+deactivate OS
+
+Worker -> Q : poll() -> "Error: wrong type..."
+Worker -> OS : exec(["say", "Error: wrong type..."])
+activate OS
+OS --> Worker : process exits
+deactivate OS
+
+Worker -> Q : poll() -> "No instance for..."
+Worker -> OS : exec(["say", "No instance for..."])
+activate OS
+OS --> Worker : process exits
+deactivate OS
+
+Worker -> Q : poll() -> null (queue empty)
+Worker -> Worker : isSpeaking = false
+deactivate Worker
+
+note across
+  startupComplete guard prevents any speech
+  until Main.java calls setStartupComplete()
+  after Thread.sleep(2000).
+end note
+
+@enduml

@@ -1,0 +1,234 @@
+@startuml HEAT Accessibility Extension - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam packageFontSize 12
+skinparam ArrowColor #555555
+skinparam ClassBorderColor #444444
+skinparam ClassBackgroundColor #FAFAFA
+skinparam PackageBackgroundColor #F0F4FF
+
+' ─────────────────────────────────────────────
+' Existing HEAT classes (simplified)
+' ─────────────────────────────────────────────
+package "managers (existing)" #F0F4FF {
+
+  class WindowManager <<singleton>> {
+    - {static} instance : WindowManager
+    - savedStatus : int
+    - currentStatus : int
+    - splashWindow : SplashWindow
+    - accessibilityPanel : AccessibilityPanel
+    + {static} getInstance() : WindowManager
+    + setStatus(int) : void
+    + setStatusCompiledError() : void
+    + setStatusCompiledCorrect() : void
+    + setStatusEvaluating() : void
+    + setStatusNoProgram() : void
+    + dismissSplash() : void
+    + openFile(File) : void
+    + getEditorWindow() : EditorWindow
+    + getConsoleWindow() : ConsoleWindow
+    + getAccessibilityPanel() : AccessibilityPanel
+  }
+
+  class SettingsManager <<singleton>> {
+    - {static} instance : SettingsManager
+    + {static} getInstance() : SettingsManager
+    + getSetting(String) : String
+    + setSetting(String, String) : void
+    + loadSettings() : void
+  }
+
+  class ActionManager <<singleton>> {
+    - newFileAction : NewFileAction
+    - openFileAction : OpenFileAction
+    - fileExplorerAction : FileExplorerAction
+    + {static} getInstance() : ActionManager
+    + triggerNewFile() : void
+    + triggerOpenFile() : void
+  }
+}
+
+package "utils (existing)" #F0F4FF {
+  class Settings {
+    + {static} TTS_ENABLED : String
+    + {static} CODE_FONT_SIZE : String
+    + {static} OUTPUT_FONT_SIZE : String
+    + {static} HIGH_CONTRAST_MODE : String
+    + {static} DEUTERANOPIA_MODE : String
+  }
+}
+
+' ─────────────────────────────────────────────
+' New: accessibility package
+' ─────────────────────────────────────────────
+package "accessibility (new)" #FFF8E0 {
+
+  class TTSManager <<singleton>> {
+    - {static} instance : TTSManager
+    - speechQueue : BlockingQueue<String>
+    - ttsProcess : Process
+    - startupComplete : boolean
+    - focusAnnouncementsEnabled : boolean
+    - inErrorBlock : boolean
+    - simplifiedSpokenForBlock : boolean
+    + {static} getInstance() : TTSManager
+    + speak(String) : void
+    + stopSpeaking() : void
+    + bufferChar(char) : void
+    + setStartupComplete() : void
+    + isEnabled() : boolean
+    + {static} modifier() : String
+    - processQueue() : void
+    - processLine(String) : void
+    - cleanLine(String) : String
+  }
+
+  class ErrorSimplifier {
+    + {static} simplify(String) : String
+  }
+
+  class ColorThemeManager {
+    - {static} deuteranopiaEnabled : boolean
+    + {static} getErrorColor() : Color
+    + {static} getPromptColor() : Color
+    + {static} setDeuteranopiaMode(boolean) : void
+    + {static} isDeuteranopiaEnabled() : boolean
+    ..
+    -- inner class DefaultTheme --
+    + {static} ERROR_COLOR : Color = #FF0000
+    + {static} PROMPT_COLOR : Color = #00AA00
+    -- inner class DeuteranopiaTheme --
+    + {static} ERROR_COLOR : Color = #E69F00
+    + {static} PROMPT_COLOR : Color = #0072B2
+  }
+
+  class FontSizeManager {
+    - {static} currentEditorFontSize : int
+    - {static} currentConsoleFontSize : int
+    + {static} MIN_FONT_SIZE : int = 8
+    + {static} MAX_FONT_SIZE : int = 36
+    + {static} INCREMENT : int = 2
+    + {static} increaseFontSize() : void
+    + {static} decreaseFontSize() : void
+    + {static} setEditorFontSize(int) : void
+    + {static} setConsoleFontSize(int) : void
+    + {static} canIncrease() : boolean
+    + {static} canDecrease() : boolean
+    + {static} getEditorFontSize() : int
+    + {static} getConsoleFontSize() : int
+    + {static} initializeFontSizes() : void
+  }
+
+  class KeyboardGuide {
+    + {static} readShortcuts() : void
+  }
+}
+
+' ─────────────────────────────────────────────
+' New: view additions
+' ─────────────────────────────────────────────
+package "view.panels (new)" #E8F5E9 {
+  class AccessibilityPanel {
+    - decreaseButton : JButton
+    - increaseButton : JButton
+    - fontSizeLabel : JLabel
+    - fontSizeSlider : JSlider
+    + updateDisplay() : void
+    - onIncreaseFontSize() : void
+    - onDecreaseFontSize() : void
+    - onSliderChanged() : void
+  }
+}
+
+package "view.windows (new)" #E8F5E9 {
+  class SplashWindow {
+    - keyDispatcher : KeyEventDispatcher
+    - statusLabel : JLabel
+    + setStatus(String) : void
+    + dismiss() : void
+    - bindKeys() : void
+  }
+}
+
+package "view.dialogs (new)" #E8F5E9 {
+  class KeyboardOpenFileDialog {
+    - filenameField : JTextField
+    - directoryField : JTextField
+    - resultList : JList<File>
+    - listModel : DefaultListModel<File>
+    - result : File
+    + {static} show(Frame) : File
+    + getResult() : File
+    - performSearch() : void
+    - searchRecursive(File, String, List, int) : void
+    - openSelected() : void
+    ..
+    MAX_RESULTS = 50
+    MAX_DEPTH = 6
+  }
+
+  class KeyboardNewFileDialog {
+    - filenameField : JTextField
+    - directoryField : JTextField
+    - result : File
+    + {static} show(Frame) : File
+    + getResult() : File
+    - attemptCreate() : void
+  }
+
+  class KeyboardFileExplorerDialog {
+    - cards : CardLayout
+    - deck : JPanel
+    - searchField : JTextField
+    - resultList : JList<File>
+    - listModel : DefaultListModel<File>
+    - targetDirField : JTextField
+    - selectedFile : File
+    - panelHistory : Deque<String>
+    + {static} show(Frame) : void
+    - performSearch() : void
+    - advanceToAction() : void
+    - openSelectedFile() : void
+    - performMove(boolean) : void
+    - showPanel(String) : void
+    - goBack() : void
+    ..
+    MAX_RESULTS = 50
+    MAX_DEPTH = 8
+  }
+}
+
+' ─────────────────────────────────────────────
+' Dependencies
+' ─────────────────────────────────────────────
+TTSManager ..> SettingsManager : reads TTS_ENABLED
+TTSManager ..> Settings : uses constants
+TTSManager ..> ErrorSimplifier : simplify()
+
+KeyboardGuide ..> TTSManager : speak()
+
+FontSizeManager ..> WindowManager : updates editor/console
+FontSizeManager ..> SettingsManager : persist size
+FontSizeManager ..> Settings : uses constants
+
+AccessibilityPanel ..> FontSizeManager : calls increase/decrease
+
+WindowManager ..> TTSManager : speak() on status change
+WindowManager ..> ColorThemeManager : getErrorColor() / getPromptColor()
+WindowManager ..> AccessibilityPanel : holds reference
+
+SplashWindow ..> ActionManager : triggerNewFile() / triggerOpenFile()
+SplashWindow ..> TTSManager : speak()
+
+KeyboardOpenFileDialog ..> TTSManager : speak()
+KeyboardNewFileDialog ..> TTSManager : speak()
+KeyboardFileExplorerDialog ..> TTSManager : speak()
+KeyboardFileExplorerDialog ..> WindowManager : openFile()
+
+ActionManager ..> KeyboardOpenFileDialog : show()
+ActionManager ..> KeyboardNewFileDialog : show()
+ActionManager ..> KeyboardFileExplorerDialog : show()
+
+@enduml

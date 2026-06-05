@@ -1,0 +1,113 @@
+@startuml KeyboardNewFileDialog - Activity Diagram
+
+skinparam ActivityBorderColor #444444
+skinparam ActivityBackgroundColor #FAFAFA
+skinparam ActivityDiamondBorderColor #444444
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #AAAAAA
+skinparam ArrowColor #555555
+
+title KeyboardNewFileDialog - user interaction flow
+
+start
+
+:Open dialog (modal);
+note right
+  TTSManager speaks:
+  "Create a new Haskell file.
+  Type the file name, then Tab
+  to enter the directory.
+  Press Enter to create."
+end note
+
+fork
+  :User presses Escape;
+  :result = null, dispose();
+  stop
+fork again
+
+  repeat
+
+    :User types filename, presses Enter;
+    :Focus moves to directory field\n(pre-filled with home directory);
+    :User edits directory, presses Enter;
+
+    if (filename empty?) then (yes)
+      :Show warning, focus filename field;
+    elseif (missing .hs extension?) then (yes)
+      :Append ".hs" to filename;
+      :Expand leading "~" to home path;
+
+      if (directory does not exist?) then (yes)
+        :directory.mkdirs();
+        if (mkdirs() fails?) then (yes)
+          :Show error dialog, focus directory field;
+        else (no)
+          if (file already exists?) then (yes)
+            :Show overwrite confirmation;
+            if (user says No?) then (yes)
+              :Focus filename field;
+            else (yes - overwrite)
+              :result = target file;
+              :dispose();
+              stop
+            endif
+          else (no)
+            :result = target file;
+            :dispose();
+            stop
+          endif
+        endif
+      else (exists)
+        if (file already exists?) then (yes)
+          :Show overwrite confirmation;
+          if (user says No?) then (yes)
+            :Focus filename field;
+          else (overwrite)
+            :result = target file;
+            :dispose();
+            stop
+          endif
+        else (no)
+          :result = target file;
+          :dispose();
+          stop
+        endif
+      endif
+    else (has extension)
+      :Expand leading "~" to home path;
+
+      if (directory does not exist?) then (yes)
+        :directory.mkdirs();
+        if (mkdirs() fails?) then (yes)
+          :Show error dialog, focus directory field;
+        else (no)
+          :result = target file;
+          :dispose();
+          stop
+        endif
+      else (exists)
+        if (file already exists?) then (yes)
+          :Show overwrite confirmation;
+          if (user says No?) then (yes)
+            :Focus filename field;
+          else (overwrite)
+            :result = target file;
+            :dispose();
+            stop
+          endif
+        else (no)
+          :result = target file;
+          :dispose();
+          stop
+        endif
+      endif
+    endif
+
+  repeat while (user retries?) is (yes)
+
+end fork
+
+stop
+
+@enduml

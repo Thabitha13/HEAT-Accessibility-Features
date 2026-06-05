@@ -1,0 +1,204 @@
+/**
+ *
+ * Copyright (c) 2005 University of Kent
+ * Computing Laboratory, Canterbury, Kent, CT2 7NP, U.K
+ *
+ * This software is the confidential and proprietary information of the
+ * Computing Laboratory of the University of Kent ("Confidential Information").
+ * You shall not disclose such confidential Information and shall use it only
+ * in accordance with the terms of the license agreement you entered into with
+ * the University.
+ *
+ * @author Dean Ashton, Sergei Krot
+ *
+ */
+
+package view.toolbars;
+
+import managers.ActionManager;
+
+import javax.swing.JButton;
+import javax.swing.JToolBar;
+import javax.swing.ImageIcon;
+import utils.Resources;
+
+
+/**
+ * The toolbar used within HEAT
+ */
+public class Toolbar {
+  /* The toolbar */
+  private JToolBar toolBar = new JToolBar();
+  private ActionManager am = ActionManager.getInstance();
+  
+  /* some icons */
+  private ImageIcon iiCompileSuccess = Resources.getIcon("buttonok22");
+  private ImageIcon iiCompileUnknown = Resources.getIcon("buttonquestion22");
+  private ImageIcon iiCompileFail    = Resources.getIcon("buttoncancel22");
+  private ImageIcon iiWorking        = Resources.getIcon("effect22");
+
+  // Thabitha: enlarged toolbar icons for accessibility
+  private static final int ICON_SIZE = 48;
+
+  /* The buttons in use */
+  private JButton openButton = new JButton(am.getToolbarOpenFileAction());
+  private JButton closeButton = new JButton(am.getToolbarCloseFileAction());
+  private JButton undoButton = new JButton(am.getToolbarUndoAction());
+  private JButton redoButton = new JButton (am.getToolbarRedoAction());
+  private JButton cutButton = new JButton(am.getToolbarEditCutAction());
+  private JButton copyButton = new JButton(am.getToolbarEditCopyAction());
+  private JButton pasteButton = new JButton(am.getToolbarEditPasteAction());
+  private JButton searchButton = new JButton(am.getToolbarSearchAction());
+  private JButton compileButton = new JButton(am.getToolbarCompileAction());
+  private JButton interruptButton = new JButton(am.getToolbarInterruptAction());
+  private JButton testButton = new JButton(am.getToolbarTestAction());
+  private JButton treeWindowButton = new JButton(am.getToggleTreeAction());
+  private JButton outputWindowButton = new JButton(am.getToggleOutputAction());
+  private JButton statusButton = new JButton();
+
+  /**
+   * Creates a new Toolbar object.
+   */
+  public Toolbar() {
+    try {
+      createToolbar();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Creates the toolbar component
+   *
+   * @throws Exception If a button could not be added
+   */
+  public void createToolbar() throws Exception {
+    toolBar.setFloatable(false);
+    toolBar.add(openButton);
+    toolBar.add(closeButton);
+    toolBar.addSeparator();
+    toolBar.add(undoButton);
+    toolBar.add(redoButton);
+    toolBar.addSeparator();
+    toolBar.add(cutButton);
+    toolBar.add(copyButton);
+    toolBar.add(pasteButton);
+    toolBar.add(searchButton);
+    toolBar.addSeparator();
+    toolBar.add(compileButton);
+    toolBar.add(interruptButton);
+    toolBar.add(testButton);
+    toolBar.addSeparator();
+    toolBar.add(treeWindowButton);
+    toolBar.add(outputWindowButton);
+    toolBar.add(javax.swing.Box.createHorizontalGlue());
+    toolBar.add(statusButton);
+    statusButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    statusButton.setFocusable(false);
+    statusButton.setBorderPainted(false);
+    statusButton.setContentAreaFilled(false);
+    statusButton.setText("Status");
+    statusButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+    setCompileStatus(1);
+
+    // Thabitha: scale all toolbar icons to ICON_SIZE for accessibility
+    iiCompileSuccess = scaleIcon(iiCompileSuccess, ICON_SIZE);
+    iiCompileUnknown = scaleIcon(iiCompileUnknown, ICON_SIZE);
+    iiCompileFail    = scaleIcon(iiCompileFail, ICON_SIZE);
+    iiWorking        = scaleIcon(iiWorking, ICON_SIZE);
+    for (java.awt.Component c : toolBar.getComponents()) {
+      if (c instanceof javax.swing.AbstractButton) {
+        javax.swing.AbstractButton b = (javax.swing.AbstractButton) c;
+        if (b.getIcon() instanceof ImageIcon) {
+          b.setIcon(scaleIcon((ImageIcon) b.getIcon(), ICON_SIZE));
+        }
+      }
+    }
+
+      openButton.getAccessibleContext().setAccessibleName("Open file. Keyboard shortcut Command O");
+      closeButton.getAccessibleContext().setAccessibleName("Close file");
+      compileButton.getAccessibleContext().setAccessibleName("Compile. Keyboard shortcut F5");
+      interruptButton.getAccessibleContext().setAccessibleName("Interrupt. Keyboard shortcut F6");
+      testButton.getAccessibleContext().setAccessibleName("Run tests. Keyboard shortcut F7");
+      undoButton.getAccessibleContext().setAccessibleName("Undo. Keyboard shortcut Command Z");
+      redoButton.getAccessibleContext().setAccessibleName("Redo. Keyboard shortcut Command Shift Z");
+      cutButton.getAccessibleContext().setAccessibleName("Cut. Keyboard shortcut Command X");
+      copyButton.getAccessibleContext().setAccessibleName("Copy. Keyboard shortcut Command C");
+      pasteButton.getAccessibleContext().setAccessibleName("Paste. Keyboard shortcut Command V");
+      searchButton.getAccessibleContext().setAccessibleName("Find. Keyboard shortcut Command F");
+      toolBar.setFocusTraversalPolicyProvider(true);
+        String mod = accessibility.TTSManager.modifier();
+        addTTSFocusListener(openButton, "Open file. Press " + mod + " O");
+        addTTSFocusListener(compileButton, "Compile button. Press F5");
+        addTTSFocusListener(interruptButton, "Interrupt button. Press F6");
+        addTTSFocusListener(testButton, "Test button. Press F7");
+        addTTSFocusListener(undoButton, "Undo button. Press " + mod + " Z");
+        addTTSFocusListener(redoButton, "Redo button. Press " + mod + " Shift Z");
+        addTTSFocusListener(cutButton, "Cut button. Press " + mod + " X");
+        addTTSFocusListener(copyButton, "Copy button. Press " + mod + " C");
+        addTTSFocusListener(pasteButton, "Paste button. Press " + mod + " V");
+        addTTSFocusListener(searchButton, "Find button. Press " + mod + " F");
+  
+  }
+
+  /**
+   * Returns the toolbar
+   *
+   * @return the toolbar object
+   */
+  public JToolBar getToolBar() {
+    return toolBar;
+  }
+  
+  public void setInterruptEnabled(boolean enabled) {
+    interruptButton.setEnabled(enabled);
+  }
+  
+  public void setTestEnabled(boolean enabled) {
+    testButton.setEnabled(enabled);
+  }
+  
+  public void setCompileEnabled(boolean enabled) {
+    compileButton.setEnabled(enabled);
+  }
+  
+  public void setCloseEnabled(boolean enabled) {
+    closeButton.setEnabled(enabled);
+  }
+  /**
+   * Sets the compile status icon
+   *
+   * @param status compilation status, 0=Fail, 1=Success, 2=Unknown
+   */
+  public void setCompileStatus(int status) {
+	  switch (status) {
+	  	case 0: statusButton.setIcon(iiCompileFail); break;
+	  	case 1: statusButton.setIcon(iiCompileSuccess); break;
+	  	case 2: statusButton.setIcon(iiCompileUnknown); break;
+	  	case 3: statusButton.setIcon(iiWorking); break;
+	  }
+  }
+
+  /**
+ * Adds a TTS focus listener to a button.
+ * Speaks the description when the button gains keyboard focus.
+ */
+  private void addTTSFocusListener(JButton button, final String description) {
+    button.addFocusListener(new java.awt.event.FocusAdapter() {
+        public void focusGained(java.awt.event.FocusEvent e) {
+            System.out.println("DEBUG focus gained: " + description + " startupComplete=" + accessibility.TTSManager.getInstance().isStartupComplete()); // TEMP DEBUG
+            if (!e.isTemporary() && accessibility.TTSManager.getInstance().isFocusAnnouncementsEnabled()) {
+                accessibility.TTSManager.getInstance().speak(description);
+            }
+        }
+    });
+}
+
+  /** Thabitha: scales an icon to a square of the given pixel size */
+  private ImageIcon scaleIcon(ImageIcon icon, int size) {
+    if (icon == null) return null;
+    java.awt.Image img = icon.getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
+    return new ImageIcon(img);
+  }
+
+}

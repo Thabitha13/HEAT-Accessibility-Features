@@ -1,0 +1,95 @@
+@startuml Font Size Control - Sequence Diagram
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceParticipantBorderColor #444444
+skinparam sequenceParticipantBackgroundColor #FAFAFA
+skinparam noteBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+
+title Font size control - increase / decrease sequence
+
+participant "User\n(Cmd+= or A+ button)" as User
+participant "ActionManager or\nAccessibilityPanel" as AM
+participant "FontSizeManager\n(static)" as FSM
+participant "EditorWindow" as EW
+participant "ConsoleWindow" as CW
+participant "SettingsManager" as SM
+participant "AccessibilityPanel\n(updateDisplay)" as AP
+
+== Increase font size ==
+
+User -> AM : Cmd+= pressed (or A+ clicked)
+activate AM
+
+AM -> FSM : canIncrease()
+activate FSM
+note right of FSM
+  Returns true if
+  max(editorSize, consoleSize) < MAX_FONT_SIZE (36)
+end note
+FSM --> AM : true
+deactivate FSM
+
+AM -> FSM : increaseFontSize()
+activate FSM
+
+FSM -> FSM : newEditorSize = currentEditorFontSize + INCREMENT (2)
+FSM -> FSM : newConsoleSize = currentConsoleFontSize + INCREMENT (2)
+
+FSM -> EW : setFontSize(newEditorSize)
+activate EW
+EW --> FSM : done
+deactivate EW
+
+FSM -> CW : setFontSize(newConsoleSize)
+activate CW
+CW --> FSM : done
+deactivate CW
+
+FSM -> SM : setSetting("CODE_FONT_SIZE", String.valueOf(newEditorSize))
+activate SM
+SM --> FSM : ok
+deactivate SM
+
+FSM -> SM : setSetting("OUTPUT_FONT_SIZE", String.valueOf(newConsoleSize))
+activate SM
+SM --> FSM : ok
+deactivate SM
+
+deactivate FSM
+deactivate AM
+
+AP -> FSM : getEditorFontSize()
+activate FSM
+FSM --> AP : newEditorSize
+deactivate FSM
+
+AP -> AP : fontSizeLabel.setText("Size: " + newEditorSize + "pt")
+AP -> AP : increaseButton.setEnabled(canIncrease())
+AP -> AP : decreaseButton.setEnabled(canDecrease())
+
+== At maximum (36pt) ==
+
+User -> AM : Cmd+= pressed again (already at 36pt)
+activate AM
+AM -> FSM : canIncrease()
+activate FSM
+FSM --> AM : false
+deactivate FSM
+note right of AM
+  No action taken.
+  A+ button is already greyed out.
+end note
+deactivate AM
+
+== Startup: load saved size ==
+
+note across
+  On application startup, FontSizeManager.initializeFontSizes()
+  reads CODE_FONT_SIZE and OUTPUT_FONT_SIZE from heat.settings.
+  Changes are written back on every increase/decrease,
+  so size persists across restarts.
+  Range: 8pt (MIN) to 36pt (MAX), step 2pt (INCREMENT).
+end note
+
+@enduml
