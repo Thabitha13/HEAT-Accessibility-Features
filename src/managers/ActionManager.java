@@ -22,7 +22,6 @@ import utils.Resources;
 import utils.Settings;
 import utils.InterpreterParser;
 
-import view.dialogs.SystemDialogs;
 import view.windows.*;
 
 import java.awt.event.ActionEvent;
@@ -38,6 +37,37 @@ import javax.swing.KeyStroke;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+import accessibility.ColorThemeManager;
+import accessibility.FontSizeManager;
+import managers.ActionManager.CloseFileAction;
+import managers.ActionManager.CollapseTreeAction;
+import managers.ActionManager.CompileAction;
+import managers.ActionManager.DecreaseFontSizeAction;
+import managers.ActionManager.EditCopyAction;
+import managers.ActionManager.EditCutAction;
+import managers.ActionManager.EditPasteAction;
+import managers.ActionManager.EditSelectAllAction;
+import managers.ActionManager.ExitProgramAction;
+import managers.ActionManager.ExpandTreeAction;
+import managers.ActionManager.GoToPastConsoleHistory;
+import managers.ActionManager.GoToRecentConsoleHistory;
+import managers.ActionManager.IncreaseFontSizeAction;
+import managers.ActionManager.InterruptAction;
+import managers.ActionManager.OpenFileAction;
+import managers.ActionManager.PrintFileAction;
+import managers.ActionManager.RedoAction;
+import managers.ActionManager.RefreshTreeAction;
+import managers.ActionManager.SaveOptionsAction;
+import managers.ActionManager.SaveWizardAction;
+import managers.ActionManager.SendEvaluationAction;
+import managers.ActionManager.ShowAboutAction;
+import managers.ActionManager.ShowHelpAction;
+import managers.ActionManager.ShowOptionsAction;
+import managers.ActionManager.ShowSearchAction;
+import managers.ActionManager.TestAction;
+import managers.ActionManager.ToggleConsoleAction;
+import managers.ActionManager.ToggleTreeAction;
+import managers.ActionManager.UndoAction;
 /**
  * The manager Class responsible for all GUI action commands
  */
@@ -177,6 +207,8 @@ public class ActionManager {
   private SaveWizardAction saveWizardAction = new SaveWizardAction("Continue",
 	      Resources.getIcon(""), "Save path and continue", new Integer(KeyEvent.VK_S),
 	      KeyStroke.getKeyStroke(KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(), false));
+        private IncreaseFontSizeAction increaseFontSizeAction = new IncreaseFontSizeAction();
+private DecreaseFontSizeAction decreaseFontSizeAction = new DecreaseFontSizeAction();
 
   
 
@@ -198,7 +230,12 @@ public class ActionManager {
 
     return instance;
   }
-
+/** Null-safe, whitespace-insensitive comparison for interpreter settings. */
+private static boolean sameSetting(String a, String b) {
+    if (a == null) a = "";
+    if (b == null) b = "";
+    return a.trim().equals(b.trim());
+}
   /* Getters for the Action objects */
     
   public ActionManager.OpenFileAction getOpenFileAction() {
@@ -361,6 +398,12 @@ public class ActionManager {
   public ActionManager.GoToRecentConsoleHistory getGoToRecentConsoleHistory(){
 	  return goToRecentConsoleHistory;
   }
+  public ActionManager.IncreaseFontSizeAction getIncreaseFontSizeAction() {
+  return increaseFontSizeAction;
+}
+public ActionManager.DecreaseFontSizeAction getDecreaseFontSizeAction() {
+  return decreaseFontSizeAction;
+}
 
   public ActionManager.KeyboardGuideAction getKeyboardGuideAction() {
     return keyboardGuideAction;
@@ -720,15 +763,15 @@ public class ActionManager {
       SettingsManager sm = SettingsManager.getInstance();
       InterpreterManager im = InterpreterManager.getInstance();
 
-      if (!(sm.getSetting(Settings.INTERPRETER_PATH).equals(interpreterPath)
-              && sm.getSetting(Settings.INTERPRETER_OPTS).equals(interpreterOpts)
-              && sm.getSetting(Settings.LIBRARY_PATH).equals(libraryPath))) {
+if (!(sameSetting(sm.getSetting(Settings.INTERPRETER_PATH), interpreterPath)
+              && sameSetting(sm.getSetting(Settings.INTERPRETER_OPTS), interpreterOpts)
+              && sameSetting(sm.getSetting(Settings.LIBRARY_PATH), libraryPath))) {
         sm.setSetting(Settings.INTERPRETER_PATH, interpreterPath);
         sm.setSetting(Settings.INTERPRETER_OPTS, interpreterOpts);
         sm.setSetting(Settings.LIBRARY_PATH, libraryPath);
         essentialChange = true;
-      } 
-      
+      }
+
       sm.setSetting(Settings.TEST_FUNCTION, wm.getOptionsWindow().getTestFunction().trim());
       sm.setSetting(Settings.TEST_POSITIVE, wm.getOptionsWindow().getTestPositive().trim());
 
@@ -750,16 +793,18 @@ public class ActionManager {
         log.warning("[ActionManager] - Failed to parse " +
           Settings.CODE_FONT_SIZE + " setting from options window");
       }
-    
+boolean deuteranopiaEnabled = wm.getOptionsWindow().isDeuteranopiaEnabled();
+      ColorThemeManager.setDeuteranopiaMode(deuteranopiaEnabled);
+      sm.setSetting(Settings.DEUTERANOPIA_MODE, String.valueOf(deuteranopiaEnabled));
+      wm.getConsoleWindow().refreshStyles();
+
       wm.getOptionsWindow().close();
       sm.saveSettings();
-      
+
       if (essentialChange) {
-        // wm.createGUI();
-        // wm.getConsoleWindow().outputInfo("Settings changes applied.\n");
-          wm.getConsoleWindow().restart();
+        wm.getConsoleWindow().restart();
       } else {
-          wm.repaintAll();
+        wm.repaintAll();
       }
     }
   } /* end SaveOptionsAction */
@@ -1175,6 +1220,40 @@ public class ActionManager {
       
     }
     
+protected class IncreaseFontSizeAction extends AbstractAction {
+  public IncreaseFontSizeAction() {
+    super("Increase Font Size");
+    putValue(ACCELERATOR_KEY,
+      KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
+  }
+  public void actionPerformed(ActionEvent e) {
+    if (FontSizeManager.canIncrease()) {
+      FontSizeManager.increaseFontSize();
+      WindowManager wm = WindowManager.getInstance();
+      if (wm != null && wm.getAccessibilityPanel() != null)
+        wm.getAccessibilityPanel().updateDisplay();
+    }
+  }
+}
+
+protected class DecreaseFontSizeAction extends AbstractAction {
+  public DecreaseFontSizeAction() {
+    super("Decrease Font Size");
+    putValue(ACCELERATOR_KEY,
+      KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx(), false));
+  }
+  public void actionPerformed(ActionEvent e) {
+    if (FontSizeManager.canDecrease()) {
+      FontSizeManager.decreaseFontSize();
+      WindowManager wm = WindowManager.getInstance();
+      if (wm != null && wm.getAccessibilityPanel() != null)
+        wm.getAccessibilityPanel().updateDisplay();
+    }
+  }
+}
+
   /**
  * KeyboardGuideAction - reads all keyboard shortcuts aloud via TTS.
  * Activated by pressing F1.
@@ -1190,6 +1269,5 @@ protected class KeyboardGuideAction extends AbstractAction {
         accessibility.KeyboardGuide.readShortcuts();
     }
 }
-    
     
 } /* end ActionManger */

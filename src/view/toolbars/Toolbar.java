@@ -37,6 +37,8 @@ public class Toolbar {
   private ImageIcon iiCompileUnknown = Resources.getIcon("buttonquestion22");
   private ImageIcon iiCompileFail = Resources.getIcon("buttoncancel22");
   private ImageIcon iiWorking = Resources.getIcon("effect22");
+  /* Target size for enlarged toolbar icons (accessibility) */
+  private static final int ICON_SIZE = 48;
 
   /* The buttons in use */
   private JButton openButton = new JButton(am.getToolbarOpenFileAction());
@@ -97,33 +99,54 @@ public class Toolbar {
     statusButton.setContentAreaFilled(false);
     statusButton.setText("Status");
     statusButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+setCompileStatus(1);
+    openButton.getAccessibleContext().setAccessibleName("Open file. Keyboard shortcut Command O");
+    closeButton.getAccessibleContext().setAccessibleName("Close file");
+    compileButton.getAccessibleContext().setAccessibleName("Compile. Keyboard shortcut F5");
+    interruptButton.getAccessibleContext().setAccessibleName("Interrupt. Keyboard shortcut F6");
+    testButton.getAccessibleContext().setAccessibleName("Run tests. Keyboard shortcut F7");
+    undoButton.getAccessibleContext().setAccessibleName("Undo. Keyboard shortcut Command Z");
+    redoButton.getAccessibleContext().setAccessibleName("Redo. Keyboard shortcut Command Shift Z");
+    cutButton.getAccessibleContext().setAccessibleName("Cut. Keyboard shortcut Command X");
+    copyButton.getAccessibleContext().setAccessibleName("Copy. Keyboard shortcut Command C");
+    pasteButton.getAccessibleContext().setAccessibleName("Paste. Keyboard shortcut Command V");
+    searchButton.getAccessibleContext().setAccessibleName("Find. Keyboard shortcut Command F");
+    toolBar.setFocusTraversalPolicyProvider(true);
+    String mod = accessibility.TTSManager.modifier();
+    addTTSFocusListener(openButton, "Open file. Press " + mod + " O");
+    addTTSFocusListener(compileButton, "Compile button. Press F5");
+    addTTSFocusListener(interruptButton, "Interrupt button. Press F6");
+    addTTSFocusListener(testButton, "Test button. Press F7");
+    addTTSFocusListener(undoButton, "Undo button. Press " + mod + " Z");
+    addTTSFocusListener(redoButton, "Redo button. Press " + mod + " Shift Z");
+    addTTSFocusListener(cutButton, "Cut button. Press " + mod + " X");
+    addTTSFocusListener(copyButton, "Copy button. Press " + mod + " C");
+    addTTSFocusListener(pasteButton, "Paste button. Press " + mod + " V");
+    addTTSFocusListener(searchButton, "Find button. Press " + mod + " F");
+
+    /* Accessibility: enlarge toolbar icons */
+    iiCompileSuccess = scaleIcon(iiCompileSuccess, ICON_SIZE);
+    iiCompileUnknown = scaleIcon(iiCompileUnknown, ICON_SIZE);
+    iiCompileFail    = scaleIcon(iiCompileFail, ICON_SIZE);
+    iiWorking        = scaleIcon(iiWorking, ICON_SIZE);
+    for (java.awt.Component c : toolBar.getComponents()) {
+      if (c instanceof javax.swing.AbstractButton) {
+        javax.swing.AbstractButton b = (javax.swing.AbstractButton) c;
+        if (b.getIcon() instanceof ImageIcon) {
+          b.setIcon(scaleIcon((ImageIcon) b.getIcon(), ICON_SIZE));
+        }
+      }
+    }
+
     setCompileStatus(1);
-      openButton.getAccessibleContext().setAccessibleName("Open file. Keyboard shortcut Command O");
-      closeButton.getAccessibleContext().setAccessibleName("Close file");
-      compileButton.getAccessibleContext().setAccessibleName("Compile. Keyboard shortcut F5");
-      interruptButton.getAccessibleContext().setAccessibleName("Interrupt. Keyboard shortcut F6");
-      testButton.getAccessibleContext().setAccessibleName("Run tests. Keyboard shortcut F7");
-      undoButton.getAccessibleContext().setAccessibleName("Undo. Keyboard shortcut Command Z");
-      redoButton.getAccessibleContext().setAccessibleName("Redo. Keyboard shortcut Command Shift Z");
-      cutButton.getAccessibleContext().setAccessibleName("Cut. Keyboard shortcut Command X");
-      copyButton.getAccessibleContext().setAccessibleName("Copy. Keyboard shortcut Command C");
-      pasteButton.getAccessibleContext().setAccessibleName("Paste. Keyboard shortcut Command V");
-      searchButton.getAccessibleContext().setAccessibleName("Find. Keyboard shortcut Command F");
-      toolBar.setFocusTraversalPolicyProvider(true);
-        String mod = accessibility.TTSManager.modifier();
-        addTTSFocusListener(openButton, "Open file. Press " + mod + " O");
-        addTTSFocusListener(compileButton, "Compile button. Press F5");
-        addTTSFocusListener(interruptButton, "Interrupt button. Press F6");
-        addTTSFocusListener(testButton, "Test button. Press F7");
-        addTTSFocusListener(undoButton, "Undo button. Press " + mod + " Z");
-        addTTSFocusListener(redoButton, "Redo button. Press " + mod + " Shift Z");
-        addTTSFocusListener(cutButton, "Cut button. Press " + mod + " X");
-        addTTSFocusListener(copyButton, "Copy button. Press " + mod + " C");
-        addTTSFocusListener(pasteButton, "Paste button. Press " + mod + " V");
-        addTTSFocusListener(searchButton, "Find button. Press " + mod + " F");
   
   }
-
+/** Scales an icon to a square of the given size. */
+  private ImageIcon scaleIcon(ImageIcon icon, int size) {
+    if (icon == null) return null;
+    java.awt.Image img = icon.getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
+    return new ImageIcon(img);
+  }
   /**
    * Returns the toolbar
    *

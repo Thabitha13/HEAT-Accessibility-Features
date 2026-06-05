@@ -14,15 +14,15 @@
 
 //import com.incors.plaf.alloy.AlloyLookAndFeel;
 
-import java.io.File;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import managers.InterpreterManager;
 import managers.SettingsManager;
 import managers.UndoManager;
 import managers.WindowManager;
 import view.windows.SplashWindow;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
+import java.io.File;
 
 /**
  * Main HEAT class
@@ -55,6 +55,8 @@ public static void main(String[] args) {
     WindowManager wm = WindowManager.getInstance();
 
     sm.loadSettings();
+    boolean deuteranopia = "true".equals(sm.getSetting(utils.Settings.DEUTERANOPIA_MODE));
+    accessibility.ColorThemeManager.setDeuteranopiaMode(deuteranopia);
     WindowManager.setLookAndFeel();
     wm.createGUI();
     wm.setSplashWindow(splash);

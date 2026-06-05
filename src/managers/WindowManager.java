@@ -66,6 +66,7 @@ public class WindowManager {
   private PrintWindow printwindow;
   private SearchDialog searchWindow;
   private TreeWindow treeWindow;
+  private view.panels.AccessibilityPanel accessibilityPanel;
  
 
   /* toolbars */
@@ -255,6 +256,13 @@ public class WindowManager {
   }
 
   /**
+   * Get the accessibility panel
+   */
+  public view.panels.AccessibilityPanel getAccessibilityPanel() {
+    return accessibilityPanel;
+  }
+
+  /**
    * Returns the {@link ConsoleWindow} used in GUI
    *
    * @return the {@link ConsoleWindow} object from GUI
@@ -344,8 +352,12 @@ public class WindowManager {
 	  mainScreenFrame.setVisible(false);
     mainScreenFrame = new JFrame();
     mainScreenFrame.setTitle("HEAT - Haskell Educational Advancement Tool");
+    // Create accessibility panel for font size control
+    // Create accessibility panel for font size control
+    accessibilityPanel = new view.panels.AccessibilityPanel();
     Image icon = Resources.getIcon("logo").getImage();
     mainScreenFrame.setIconImage(icon);
+
     
     // BorderLayout borderLayout1 = new BorderLayout();
 
@@ -401,9 +413,15 @@ public class WindowManager {
       // jSplitTree.add(jSplitMain, JSplitPane.RIGHT);
      
       /* add menu and toolbar */
+      /* add menu and toolbar */
       mainScreenFrame.setJMenuBar(mainMenu.getToolBar());
-      mainScreenFrame.getContentPane().add(toolbar.getToolBar(),
-        BorderLayout.NORTH);
+
+      /* stack the toolbar and the accessibility panel at the top */
+      javax.swing.JPanel topPanel = new javax.swing.JPanel();
+      topPanel.setLayout(new javax.swing.BoxLayout(topPanel, javax.swing.BoxLayout.Y_AXIS));
+      topPanel.add(toolbar.getToolBar());
+      topPanel.add(accessibilityPanel);
+      mainScreenFrame.getContentPane().add(topPanel, BorderLayout.NORTH);
 
       /* add splitpane and evaluation window to main frame */
       mainScreenFrame.getContentPane().add(jSplitTree, BorderLayout.CENTER);

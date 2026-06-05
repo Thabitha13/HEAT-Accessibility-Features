@@ -19,6 +19,7 @@ package managers;
 import java.util.logging.Logger;
 import utils.Settings;
 import java.io.*;
+import java.util.Enumeration;
 import java.util.Properties;
 import javax.swing.JOptionPane;
 
@@ -101,8 +102,7 @@ public class SettingsManager {
     newSettings.setProperty(Settings.CODE_FONT_SIZE, "14");
     newSettings.setProperty(Settings.INTERPRETER_OPTS,"");
     newSettings.setProperty(Settings.TEST_FUNCTION,"");
-    newSettings.setProperty(Settings.TEST_POSITIVE,"True");
-    return newSettings;
+    newSettings.setProperty(Settings.DEUTERANOPIA_MODE, "false");    return newSettings;
   }
   
   /**
